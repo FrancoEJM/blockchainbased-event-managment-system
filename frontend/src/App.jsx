@@ -1,0 +1,30 @@
+import "./App.css";
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
+import { Events } from "./pages/Events";
+import { Event } from "./pages/Events/";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { CreateEvent } from "./pages/CreateEvent";
+import { Profile } from "./pages/Profile";
+
+function App() {
+  return (
+    <div className="App">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/events/:id" element={<Event />}></Route>
+          <Route path="/signed" element={<div>signed</div>}></Route>
+          <Route path="/created" element={<div>created</div>}></Route>
+          <Route path="/new-event" element={<CreateEvent />} />
+          <Route path="/me" element={<Profile />} />
+          <Route path="*" element={<h1>Not Found</h1>} />
+        </Routes>
+      </BrowserRouter>
+    </div>
+  );
+}
+
+export default App;
