@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@preline/stepper": "^2.1.0",
     "@reduxjs/toolkit": "^2.2.3",
     "axios": "^1.6.8",
     "date-fns": "^3.6.0",

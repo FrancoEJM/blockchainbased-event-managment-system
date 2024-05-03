@@ -1,34 +1,13 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState } from "react";
+import StepOne from "./StepOne";
+import StepTwo from "./StepTwo";
+import StepThree from "./StepThree";
 
-function EventWizard() {
+const EventWizard = () => {
   const [step, setStep] = useState(1);
-  const [categorias, setCategorias] = useState([]);
-  const [modalidades, setModalidades] = useState([]);
-  const [idiomas, setIdiomas] = useState([]);
-  const [privacidades, setPrivacidades] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/event/create`);
-        const data = response.data;
-        console.log(response.data);
-
-        setCategorias(data.categoria);
-        setModalidades(data.modalidad);
-        setIdiomas(data.idioma);
-        setPrivacidades(data.privacidad);
-      } catch (error) {
-        console.error('Error al cargar los datos:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const handleNext = () => {
-    if (step < 4) {
+    if (step < 3) {
       setStep(step + 1);
     }
   };
@@ -39,81 +18,87 @@ function EventWizard() {
     }
   };
 
-  return (
-    <div className="flex justify-center items-center max-h-screen">
-      <div className="bg-white p-8 border-2 border-gray-200 shadow-lg rounded-lg w-5/6 h-[75vh] overflow-hidden mt-8 relative">
-        <div className="flex space-x-4">
-          <div className="flex-1">
-            <div>
-              <label htmlFor="nombre" className="block mb-1">Nombre:</label>
-              <input type="text" id="nombre" className="w-full border border-gray-300 rounded-md p-2" />
-            </div>
-            <div>
-              <label htmlFor="descripcion" className="block mb-1">Descripción:</label>
-              <textarea id="descripcion" className="w-full border border-gray-300 rounded-md p-2 h-20"></textarea>
-            </div>
-          </div>
-          <div className="flex-1">
-            <div>
-              <label htmlFor="desde" className="block mb-1">Desde:</label>
-              <input type="date" id="desde" className="w-full border border-gray-300 rounded-md p-2" />
-            </div>
-            <div>
-              <label htmlFor="privacidad" className="block mb-1">Privacidad:</label>
-              <select id="privacidad" className="w-full border border-gray-300 rounded-md p-2">
-                {privacidades.map((privacidad) => (
-                  <option key={privacidad.id_privacidad} value={privacidad.id_privacidad}>{privacidad.descripcion}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="invitados" className="block mb-1">Lista de Invitados:</label>
-              <input type="text" id="invitados" className="w-full border border-gray-300 rounded-md p-2" />
-            </div>
-          </div>
-          <div className="flex-1">
-            <div>
-              <label htmlFor="hasta" className="block mb-1">Hasta:</label>
-              <input type="date" id="hasta" className="w-full border border-gray-300 rounded-md p-2" />
-            </div>
-            <div>
-              <label htmlFor="idioma" className="block mb-1">Idioma:</label>
-              <select id="idioma" className="w-full border border-gray-300 rounded-md p-2">
-                {idiomas.map((idioma) => (
-                  <option key={idioma.id_idioma} value={idioma.id_idioma}>{idioma.descripcion}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="modalidad" className="block mb-1">Modalidad:</label>
-              <select id="modalidad" className="w-full border border-gray-300 rounded-md p-2">
-              {modalidades && modalidades.map((modalidad) => (
-                <option key={modalidad.id_modalidad} value={modalidad.id_modalidad}>{modalidad.descripcion}</option>
-              ))}
+  const handleFinish = () => {
+    // Handle finish logic here
+  };
 
-              </select>
-              {modalidades === 'online' && (
-                <div>
-                  <label htmlFor="url" className="block mb-1 mt-2">URL:</label>
-                  <input type="text" id="url" className="w-full border border-gray-300 rounded-md p-2" />
-                </div>
-              )}
+  return (
+    <div className="p-4 bg-white rounded-lg shadow-md mt-5 mx-48">
+      <div data-hs-stepper="">
+        <ul className="relative flex flex-row gap-x-2">
+          {[1, 2, 3].map((index) => (
+            <li
+              key={index}
+              className={`flex items-center gap-x-2 shrink basis-0 flex-1 group ${
+                index === step
+                  ? "hs-stepper-active:bg-blue-600 hs-stepper-active:text-white"
+                  : ""
+              } ${
+                index < step
+                  ? "hs-stepper-completed:bg-teal-500 hs-stepper-completed:group-focus:bg-teal-600"
+                  : ""
+              }`}
+              data-hs-stepper-nav-item={`{"index": ${index}}`}
+            >
+              <span className="min-w-7 min-h-7 group inline-flex items-center text-xs align-middle">
+                <span className="size-7 flex justify-center items-center flex-shrink-0 bg-gray-100 font-medium text-gray-800 rounded-full group-focus:bg-gray-200">
+                  {index}
+                </span>
+                <span className="ms-2 text-sm font-medium text-gray-800">
+                  Step
+                </span>
+              </span>
+              <div className="w-full h-px flex-1 bg-gray-200 group-last:hidden"></div>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-5 sm:mt-8">
+          {[1, 2, 3].map((index) => (
+            <div
+              key={index}
+              className="p-4 h-max bg-gray-50 flex justify-center items-center border border-dashed border-gray-200 rounded-xl"
+              data-hs-stepper-content-item={`{"index": ${index}}`}
+              style={{ display: index === step ? "block" : "none" }}
+            >
+              {index === 1 && <StepOne />}
+              {index === 2 && <StepTwo />}
+              {index === 3 && <StepThree />}
             </div>
+          ))}
+          <div className="mt-5 flex justify-between items-center gap-x-2">
+            <button
+              disabled={step === 1}
+              type="button"
+              className="py-2 px-3 inline-flex items-center gap-x-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
+              data-hs-stepper-back-btn=""
+              onClick={handleBack}
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              className="py-2 px-3 inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+              data-hs-stepper-next-btn=""
+              onClick={handleNext}
+              style={{ display: step === 3 ? "none" : "inline-flex" }}
+            >
+              Next
+            </button>
+            {step === 3 && (
+              <button
+                type="button"
+                className="py-2 px-3 inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                data-hs-stepper-finish-btn=""
+                onClick={handleFinish}
+              >
+                Finish
+              </button>
+            )}
           </div>
-        </div>
-        <div className="flex justify-end">
-          {step > 1 && (
-            <button type="button" className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2" onClick={handleBack}>Atrás</button>
-          )}
-          {step < 4 ? (
-            <button type="button" className={`bg-blue-500 text-white px-4 py-2 rounded-md ${step === 1 ? 'ml-auto' : ''}`} onClick={handleNext}>Siguiente</button>
-          ) : (
-            <button type="button" className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={() => console.log('Registro completado')}>Finalizar</button>
-          )}
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default EventWizard;

@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@preline/stepper':
+    specifier: ^2.1.0
+    version: 2.1.0
   '@reduxjs/toolkit':
     specifier: ^2.2.3
     version: 2.2.3(react@18.2.0)
@@ -673,6 +676,10 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /@preline/stepper@2.1.0:
+    resolution: {integrity: sha512-/6qJtJhQb3brpambbBYHPOkTmdgXE3vG3qS9zBnwfR3U7RPqzmzM/18d7eR/q1VnXhO1dvJqShAb6ibcsYJEwQ==}
+    dev: false
 
   /@reduxjs/toolkit@2.2.3(react@18.2.0):
     resolution: {integrity: sha512-76dll9EnJXg4EVcI5YNxZA/9hSAmZsFqzMmNRHvIlzw2WS/twfcVX3ysYrWGJMClwEmChQFC4yRq74tn6fdzRA==}

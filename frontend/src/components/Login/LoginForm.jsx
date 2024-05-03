@@ -33,6 +33,9 @@ function LoginForm() {
     })
       .then((res) => {
         if (res.status === 200) {
+          let token = res.data.access_token;
+          localStorage.setItem("token", token);
+          setId(localStorage.getItem("token"));
           loginRedirect();
         }
       })
@@ -46,6 +49,25 @@ function LoginForm() {
 
   const loginRedirect = () => {
     navigate("/events");
+  };
+
+  const setId = async (token) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/me`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const id_usuario = response.data.id_usuario;
+      localStorage.setItem("id_usuario", id_usuario);
+    } catch (error) {
+      console.error(error);
+      throw new Error("No se pudo obtener el ID de usuario");
+    }
   };
 
   return (
