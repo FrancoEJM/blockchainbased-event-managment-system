@@ -3,7 +3,7 @@ import avatarPlaceholder from "../assets/avatarPlaceholder.png";
 
 function Navbar() {
   return (
-    <header className="flex items-center justify-center py-4 bg-violet-50">
+    <header className="flex items-center justify-center py-4 bg-violet-100">
       <nav className="max-w-[85rem] w-full mx-10 px-4 flex items-center justify-between">
         <div className="group relative cursor-pointer py-2">
           <div className="flex items-center justify-between space-x-5 bg-violet-50 px-4 mx-6">
