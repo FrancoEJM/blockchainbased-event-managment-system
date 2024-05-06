@@ -98,8 +98,11 @@ const EventWizard = () => {
                   onUpdate={setStepOneData}
                 />
               )}
-              {index === 2 && (
-                <StepTwo onChange={(data) => setStepTwoData(data)} />
+              {index === 2 && eventData && (
+                <StepTwo
+                  categorias={eventData.categoria}
+                  onChange={(data) => setStepTwoData(data)}
+                />
               )}
               {index === 3 && <StepThree />}
             </div>

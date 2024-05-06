@@ -10,19 +10,25 @@ import negocios from "../../assets/categorias/negocios.png";
 import tecnologia from "../../assets/categorias/tecnologia.png";
 import viajes from "../../assets/categorias/viajes.png";
 
-function StepTwo({ onChange }) {
+function StepTwo({ categorias, onChange }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const categories = [
-    { id: 1, name: "Arte y Cultura", image: arte },
-    { id: 2, name: "Deportes", image: deportes },
-    { id: 3, name: "Educación", image: educacion },
-    { id: 4, name: "Entretenimiento", image: entretenimiento },
-    { id: 5, name: "Gastronomía", image: gastronomia },
-    { id: 6, name: "Música", image: musica },
-    { id: 7, name: "Negocios", image: negocios },
-    { id: 8, name: "Tecnología", image: tecnologia },
-    { id: 9, name: "Viajes", image: viajes },
+  const imagenes = [
+    arte,
+    deportes,
+    educacion,
+    entretenimiento,
+    gastronomia,
+    musica,
+    negocios,
+    tecnologia,
+    viajes,
   ];
+
+  const categories = categorias.map((categoria, index) => ({
+    id: categoria.id_categoria,
+    name: categoria.descripcion,
+    image: imagenes[index],
+  }));
 
   const handleCategoryClick = (categoryId) => {
     setSelectedCategory(categoryId);
