@@ -1,10 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import StepOne from "./StepOne";
 import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
 
 const EventWizard = () => {
   const [step, setStep] = useState(1);
+  const [eventData, setEventData] = useState(null);
+  const [stepOneData, setStepOneData] = useState({
+    name: "",
+    desde: "",
+    hasta: "",
+    descripcion: "",
+    privacidad: "",
+    idioma: "",
+    modalidad: "",
+    lista: [],
+    url: "",
+  });
+  const [stepTwoData, setStepTwoData] = useState({});
+
+  useEffect(() => {
+    // Realizar la petición al backend al renderizarse el componente
+    axios
+      .get(`${import.meta.env.VITE_BACKEND_URL}/api/event/create`)
+      .then((response) => {
+        setEventData(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
 
   const handleNext = () => {
     if (step < 3) {
@@ -19,7 +45,11 @@ const EventWizard = () => {
   };
 
   const handleFinish = () => {
-    // Handle finish logic here
+    // Aquí puedes enviar los datos finales a donde los necesites
+    console.log("Datos finales:", {
+      stepOneData: stepOneData,
+      stepTwoData: stepTwoData,
+    });
   };
 
   return (
@@ -60,8 +90,17 @@ const EventWizard = () => {
               data-hs-stepper-content-item={`{"index": ${index}}`}
               style={{ display: index === step ? "block" : "none" }}
             >
-              {index === 1 && <StepOne />}
-              {index === 2 && <StepTwo />}
+              {index === 1 && eventData && (
+                <StepOne
+                  modalidad={eventData.modalidad}
+                  idioma={eventData.idioma}
+                  privacidad={eventData.privacidad}
+                  onUpdate={setStepOneData}
+                />
+              )}
+              {index === 2 && (
+                <StepTwo onChange={(data) => setStepTwoData(data)} />
+              )}
               {index === 3 && <StepThree />}
             </div>
           ))}

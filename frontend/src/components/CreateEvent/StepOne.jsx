@@ -1,19 +1,40 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 
-function StepOne() {
+function StepOne({ modalidad, idioma, privacidad, onUpdate }) {
   const [invitados, setInvitados] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const [modalidad, setModalidad] = useState("");
+  const [modalidadAct, setModalidad] = useState("");
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    // Si no, actualiza el resto de los campos en stepOneData
+    onUpdate((prevData) => ({
+      ...prevData,
+      [name]: value,
+      lista: invitados, // Incluye la lista de invitados actualizada
+    }));
+  };
 
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
   };
 
   const handleInputKeyPress = (event) => {
-    if (event.key === "Enter" && inputValue.trim() !== "") {
-      event.preventDefault(); // Evitar que el formulario se envíe al presionar Enter
-      setInvitados([...invitados, inputValue]);
-      setInputValue("");
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const trimmedValue = inputValue.trim();
+      if (trimmedValue !== "") {
+        const newInvitados = [...invitados, trimmedValue];
+        setInvitados(newInvitados);
+        setInputValue("");
+
+        // Actualizar stepOneData con la nueva lista de invitados
+        onUpdate((prevData) => ({
+          ...prevData,
+          lista: newInvitados,
+        }));
+      }
     }
   };
 
@@ -21,140 +42,172 @@ function StepOne() {
     const nuevosInvitados = [...invitados];
     nuevosInvitados.splice(index, 1);
     setInvitados(nuevosInvitados);
+
+    // Actualizar stepOneData con la nueva lista de invitados
+    onUpdate((prevData) => ({
+      ...prevData,
+      lista: nuevosInvitados,
+    }));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault(); // Evitar que el formulario se envíe al presionar Enter
+  const sortOptionsById = (options) => {
+    return options.sort((a, b) => a.id_idioma - b.id_idioma);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form>
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-6">
           <label
             className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
-            htmlFor="grid-first-name"
+            htmlFor="name"
           >
             Nombre
           </label>
           <input
             className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3"
-            id="grid-first-name"
+            id="name"
+            name="name"
             type="text"
             placeholder="Ingrese el nombre del evento"
+            onChange={handleChange}
           />
         </div>
         <div className="col-span-3">
           <label
             className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
-            htmlFor="grid-first-name"
+            htmlFor="desde"
           >
             Desde:
           </label>
           <input
             className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3"
-            id="grid-first-name"
+            id="desde"
+            name="desde"
             type="time"
             step="60"
             placeholder="HH:mm"
+            onChange={handleChange}
           />
         </div>
         <div className="col-span-3">
           <label
             className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
-            htmlFor="grid-first-name"
+            htmlFor="hasta"
           >
             Hasta:
           </label>
           <input
             className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3"
-            id="grid-first-name"
+            id="hasta"
+            name="hasta"
             type="time"
             step="60"
             placeholder="HH:mm"
+            onChange={handleChange}
           />
         </div>
         <div className="col-span-6 row-span-2">
           <label
             className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
-            htmlFor="grid-first-name"
+            htmlFor="descripcion"
           >
             Descripcion
           </label>
           <textarea
             className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3 h-36"
-            id="grid-first-name"
+            id="descripcion"
+            name="descripcion"
             type="text"
             placeholder="Ingrese una descripción para su evento"
+            onChange={handleChange}
           />
         </div>
         <div className="col-span-2">
           <label
             className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
-            htmlFor="grid-first-name"
+            htmlFor="privacidad"
           >
             Privacidad
           </label>
           <select
             className=" block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3"
-            id="grid-first-name"
+            id="privacidad"
+            name="privacidad"
             type="text"
-            placeholder="Ingrese una descripción para su evento"
+            onChange={handleChange}
           >
-            <option value="1">1</option>
-            <option value="2">2</option>
+            <option value="">Seleccione una opción</option>
+            {privacidad.map((option) => (
+              <option key={option.id_privacidad} value={option.id_privacidad}>
+                {option.descripcion}
+              </option>
+            ))}
           </select>
         </div>
         <div className="col-span-2">
           <label
             className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
-            htmlFor="grid-first-name"
+            htmlFor="idioma"
           >
             Idioma
           </label>
           <select
             className=" block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3"
-            id="grid-first-name"
+            id="idioma"
+            name="idioma"
             type="text"
-            placeholder="Ingrese una descripción para su evento"
+            onChange={handleChange}
           >
-            <option value="1">1</option>
-            <option value="2">2</option>
+            <option value="">Seleccione una opción</option>
+            {sortOptionsById(idioma).map((option) => (
+              <option key={option.id_idioma} value={option.id_idioma}>
+                {option.descripcion}
+              </option>
+            ))}
           </select>
         </div>
         <div className="col-span-2">
           <label
             className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
-            htmlFor="grid-first-name"
+            htmlFor="modalidad"
           >
             Modalidad
           </label>
           <select
             className=" block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3"
-            id="grid-first-name"
+            id="modalidad"
+            name="modalidad"
             type="text"
             placeholder="Ingrese una descripción para su evento"
-            onChange={(e) => setModalidad(e.target.value)}
+            onChange={(e) => {
+              handleChange(e);
+              setModalidad(e.target.value);
+            }}
           >
-            <option value="1">1</option>
-            <option value="2">2</option>
+            <option value="">Seleccione una opción</option>
+            {modalidad.map((option) => (
+              <option key={option.id_modalidad} value={option.id_modalidad}>
+                {option.descripcion}
+              </option>
+            ))}
           </select>
         </div>
         <div className="col-span-2">
           <label
             className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
-            htmlFor="grid-first-name"
+            htmlFor="lista"
           >
             Lista de invitados
           </label>
           <input
             className=" block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3"
-            id="grid-first-name"
+            id="lista"
             type="text"
             placeholder="Ingrese un invitado y presione Enter"
             value={inputValue}
             onChange={handleInputChange}
-            onKeyPress={handleInputKeyPress}
+            onKeyDown={handleInputKeyPress}
           />
         </div>
         <div className="col-span-2">
@@ -186,19 +239,21 @@ function StepOne() {
           </div>
         </div>
         <div className="col-span-2">
-          {modalidad === "2" && (
+          {modalidadAct === "2" && (
             <div>
               <label
                 className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
-                htmlFor="grid-first-name"
+                htmlFor="url"
               >
-                Url
+                URL
               </label>
               <input
                 className=" block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3"
-                id="grid-first-name"
+                id="url"
+                name="url"
                 type="text"
                 placeholder="Ingrese la URL del evento"
+                onChange={handleChange}
               />
             </div>
           )}
@@ -207,4 +262,5 @@ function StepOne() {
     </form>
   );
 }
+
 export default StepOne;
