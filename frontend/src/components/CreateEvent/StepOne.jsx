@@ -8,11 +8,10 @@ function StepOne({ modalidad, idioma, privacidad, onUpdate }) {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    // Si no, actualiza el resto de los campos en stepOneData
     onUpdate((prevData) => ({
       ...prevData,
       [name]: value,
-      lista: invitados, // Incluye la lista de invitados actualizada
+      lista: invitados,
     }));
   };
 
@@ -20,6 +19,7 @@ function StepOne({ modalidad, idioma, privacidad, onUpdate }) {
     setInputValue(event.target.value);
   };
 
+  //Manejar invitados
   const handleInputKeyPress = (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -28,8 +28,6 @@ function StepOne({ modalidad, idioma, privacidad, onUpdate }) {
         const newInvitados = [...invitados, trimmedValue];
         setInvitados(newInvitados);
         setInputValue("");
-
-        // Actualizar stepOneData con la nueva lista de invitados
         onUpdate((prevData) => ({
           ...prevData,
           lista: newInvitados,
@@ -37,13 +35,10 @@ function StepOne({ modalidad, idioma, privacidad, onUpdate }) {
       }
     }
   };
-
   const handleRemoveInvitado = (index) => {
     const nuevosInvitados = [...invitados];
     nuevosInvitados.splice(index, 1);
     setInvitados(nuevosInvitados);
-
-    // Actualizar stepOneData con la nueva lista de invitados
     onUpdate((prevData) => ({
       ...prevData,
       lista: nuevosInvitados,

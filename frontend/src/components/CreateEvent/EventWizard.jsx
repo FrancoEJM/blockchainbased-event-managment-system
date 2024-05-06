@@ -21,7 +21,6 @@ const EventWizard = () => {
   const [stepTwoData, setStepTwoData] = useState({});
 
   useEffect(() => {
-    // Realizar la petición al backend al renderizarse el componente
     axios
       .get(`${import.meta.env.VITE_BACKEND_URL}/api/event/create`)
       .then((response) => {
@@ -32,20 +31,20 @@ const EventWizard = () => {
       });
   }, []);
 
+  // Manejar pasos del stepper
   const handleNext = () => {
     if (step < 3) {
       setStep(step + 1);
     }
   };
-
   const handleBack = () => {
     if (step > 1) {
       setStep(step - 1);
     }
   };
 
+  //Manejar envío del formulario y crear el evento
   const handleFinish = () => {
-    // Aquí puedes enviar los datos finales a donde los necesites
     console.log("Datos finales:", {
       stepOneData: stepOneData,
       stepTwoData: stepTwoData,
