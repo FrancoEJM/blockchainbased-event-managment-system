@@ -68,7 +68,24 @@ function StepOne({ modalidad, idioma, privacidad, onUpdate }) {
             onChange={handleChange}
           />
         </div>
-        <div className="col-span-3">
+        <div className="col-span-2">
+          <label
+            className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
+            htmlFor="fecha"
+          >
+            Fecha:
+          </label>
+          <input
+            className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3"
+            id="fecha"
+            name="fecha"
+            type="date"
+            pattern="\d{1,2}/\d{1,2}/\d{4}"
+            placeholder="dd/mm/yyyy"
+            onChange={handleChange}
+          />
+        </div>
+        <div className="col-span-2">
           <label
             className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
             htmlFor="desde"
@@ -85,7 +102,7 @@ function StepOne({ modalidad, idioma, privacidad, onUpdate }) {
             onChange={handleChange}
           />
         </div>
-        <div className="col-span-3">
+        <div className="col-span-2">
           <label
             className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
             htmlFor="hasta"

@@ -26,6 +26,7 @@ class EventosDefinicion(Base):
     categoria = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_CATEGORIA.id_categoria"))
     hora_inicio = _sql.Column(_sql.DateTime, default=None)
     hora_fin = _sql.Column(_sql.DateTime, default=None)
+    fecha = _sql.Column(_sql.DateTime, default=None)
     idioma = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_IDIOMAS.id_idioma"))
     privacidad = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_PRIVACIDAD.id_privacidad"))
     modalidad = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_MODALIDAD.id_modalidad"))

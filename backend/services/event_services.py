@@ -2,7 +2,7 @@ import fastapi as _fastapi
 import fastapi.security as _security
 import sqlalchemy.orm as _orm
 import passlib.hash as _hash
-from schemas import user_schemas as user_sch
+from schemas import user_schemas as user_sch, event_schemas as event_sch
 from models import user_models as user_md, event_models as event_md
 from services import database_services as db_sv
 
@@ -20,3 +20,32 @@ async def get_languages(db: _orm.Session):
 
 async def get_privacities(db: _orm.Session):
     return db.query(event_md.EventosPrivacidad).all()
+
+async def create_event_record(event_author: int, db: _orm.Session):
+    event_record_obj = event_md.Eventos(
+        usuario_creador = event_author
+    )
+    db.add(event_record_obj)
+    db.commit()
+    db.refresh(event_record_obj)
+    return event_record_obj
+
+async def create_event(event: event_sch.EventCreate, db: _orm.Session):
+    event_obj = event_md.EventosDefinicion(
+        nombre = event.nombre,
+        categoria = event.categoria,
+        hora_inicio = event.hora_inicio,
+        hora_fin = event.hora_fin,
+        fecha = event.fecha,
+        idioma = event.idioma,
+        privacidad = event.privacidad,
+        modalidad = event.modalidad,
+        url_evento = event.url_evento,
+        direccion = event.direccion,
+        latitud = event.latitud,
+        longitud = event.longitud
+    )
+    db.add(event_obj)
+    db.commit()
+    db.refresh(event_obj)
+    return event_obj

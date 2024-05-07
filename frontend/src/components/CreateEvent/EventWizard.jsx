@@ -9,6 +9,7 @@ const EventWizard = () => {
   const [eventData, setEventData] = useState(null);
   const [stepOneData, setStepOneData] = useState({
     name: "",
+    fecha: "",
     desde: "",
     hasta: "",
     descripcion: "",
