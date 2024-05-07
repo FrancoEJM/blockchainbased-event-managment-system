@@ -44,13 +44,33 @@ const EventWizard = () => {
     }
   };
 
-  //Manejar envío del formulario y crear el evento
-  const handleFinish = () => {
-    console.log("Datos finales:", {
-      stepOneData: stepOneData,
-      stepTwoData: stepTwoData,
-    });
-  };
+
+const handleFinish = async () => {
+    const data = {
+        id_creador: localStorage.getItem('id_usuario'),
+        nombre: stepOneData.name,
+        categoria: stepTwoData,
+        hora_inicio: stepOneData.desde,
+        hora_fin: stepOneData.hasta,
+        fecha: stepOneData.fecha,
+        idioma: stepOneData.idioma,
+        privacidad: stepOneData.privacidad,
+        modalidad: stepOneData.modalidad,
+        url_evento: stepOneData.url,
+        direccion: "",
+        latitud: 0,
+        longitud: 0
+    };
+    console.log("data", data);
+  
+    try {
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/event/create`, data);
+        console.log('Evento creado:', response.data);
+    } catch (error) {
+        console.error('Error al crear el evento:', error);
+    }
+};
+
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md mt-5 mx-48">

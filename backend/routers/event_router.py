@@ -27,10 +27,7 @@ async def get_select_data(db:_orm.Session = _fastapi.Depends(db_sv.get_db)):
 @router.post("/api/event/create")
 async def create_new_event(event: event_sch.EventCreate,
                            db: _orm.Session= _fastapi.Depends(db_sv.get_db)):
-    record_event = await event_sv.create_event_record(event.id_creador, db)
-    print('-----------------------------------------------------------')
-    print(record_event)
-    print('-----------------------------------------------------------')
-    return 0
-    # return await event_sv.create_event(event,db)
+    id = await event_sv.create_event_record(event.id_creador, db)
+    create_event = await event_sv.create_event(id,event,db)
+    return create_event
     

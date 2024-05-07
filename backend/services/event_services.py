@@ -23,15 +23,17 @@ async def get_privacities(db: _orm.Session):
 
 async def create_event_record(event_author: int, db: _orm.Session):
     event_record_obj = event_md.Eventos(
-        usuario_creador = event_author
+        usuario_creador=event_author
     )
     db.add(event_record_obj)
     db.commit()
     db.refresh(event_record_obj)
-    return event_record_obj
+    return event_record_obj.id_evento
 
-async def create_event(event: event_sch.EventCreate, db: _orm.Session):
+
+async def create_event(id:int, event: event_sch.EventCreate, db: _orm.Session):
     event_obj = event_md.EventosDefinicion(
+        id_evento = id,
         nombre = event.nombre,
         categoria = event.categoria,
         hora_inicio = event.hora_inicio,
