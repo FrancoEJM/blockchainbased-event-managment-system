@@ -71,29 +71,45 @@ const EventWizard = () => {
         `${import.meta.env.VITE_BACKEND_URL}/api/event/create`,
         data
       );
-      if (response.status == 200 && imageData) {
-        console.log("El evento se ha creado correctamente", response);
+      if (response.status == 200) {
         const id_evento = response.data.id_evento;
-        const formData = new FormData();
-        formData.append("id", localStorage.getItem("id_usuario"));
-        formData.append("file", imageData);
-        try {
-          const response_img = await axios.post(
-            `${
-              import.meta.env.VITE_BACKEND_URL
-            }/api/event/upload?id=${id_evento}`,
-            formData,
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
+        if (imageData) {
+          console.log("El evento se ha creado correctamente", response);
+          const formData = new FormData();
+          formData.append("id", localStorage.getItem("id_usuario"));
+          formData.append("file", imageData);
+          try {
+            const response_img = await axios.post(
+              `${
+                import.meta.env.VITE_BACKEND_URL
+              }/api/event/upload?id=${id_evento}`,
+              formData,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
+            if (response_img.status == 200) {
+              console.log("La imagen se ha ingresado correctamente");
             }
-          );
-          if (response_img.status == 200) {
-            console.log("La imagen se ha ingresado correctamente");
+          } catch (error) {
+            console.error("Error al subir la imagen", error);
           }
-        } catch (error) {
-          console.error("Error al subir la imagen", error);
+        }
+        if (stepOneData.lista && stepOneData.lista.length > 0) {
+          try {
+            const queryParams = stepOneData.lista
+              .map((email) => `q=${encodeURIComponent(email)}`)
+              .join("&");
+            const url = `${
+              import.meta.env.VITE_BACKEND_URL
+            }/api/event/guests?event_id=${id_evento}&${queryParams}`;
+            const response = await axios.post(url);
+            console.log("Respuesta del servidor:", response.data);
+          } catch (error) {
+            console.error("Error al ingresar los invitados:", error);
+          }
         }
       }
     } catch (error) {
