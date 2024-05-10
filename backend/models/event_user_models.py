@@ -34,9 +34,9 @@ class EventoInvitados(Base):
     __tablename__= "BLC_EVENTOS_INVITADOS"
     id_evento = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_EVENTOS_CREACION.id_evento"), primary_key=True, index=True)
     id_usuario = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_USUARIOS.id_usuario"), primary_key=True, index=True)
-    correo_electronico = _sql.Column(_sql.String)
+    correo_electronico = _sql.Column(_sql.String, primary_key=True)
     inscrito = _sql.Column(_sql.Boolean, default=False)
-    fecha_invitacion = _sql.Column(_sql.DateTime)
+    fecha_invitacion = _sql.Column(_sql.DateTime, default=_dt.datetime.now(_dt.timezone.utc))
 
     evento = _orm.relationship("Eventos", back_populates="invitado")
     usuario = _orm.relationship("Usuario", back_populates="invitado")

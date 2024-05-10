@@ -18,3 +18,8 @@ class EventCreate(_EventBase):
     direccion: str
     latitud: float
     longitud: float
+
+class ImageUpload(_pydantic.BaseModel):
+    id_evento: int
+    nombre: str
+    path: str

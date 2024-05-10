@@ -1,3 +1,4 @@
+// EventWizard.jsx
 import { useState, useEffect } from "react";
 import axios from "axios";
 import StepOne from "./StepOne";
@@ -20,6 +21,9 @@ const EventWizard = () => {
     url: "",
   });
   const [stepTwoData, setStepTwoData] = useState({});
+  const [locationData, setLocationData] = useState({ latitud: 0, longitud: 0 });
+  const [adressData, setAddressData] = useState("");
+  const [imageData, setImageData] = useState("");
 
   useEffect(() => {
     axios
@@ -32,76 +36,106 @@ const EventWizard = () => {
       });
   }, []);
 
-  // Manejar pasos del stepper
   const handleNext = () => {
     if (step < 3) {
       setStep(step + 1);
     }
   };
+
   const handleBack = () => {
     if (step > 1) {
       setStep(step - 1);
     }
   };
 
-
-const handleFinish = async () => {
+  const handleFinish = async () => {
     const data = {
-        id_creador: localStorage.getItem('id_usuario'),
-        nombre: stepOneData.name,
-        categoria: stepTwoData,
-        hora_inicio: stepOneData.desde,
-        hora_fin: stepOneData.hasta,
-        fecha: stepOneData.fecha,
-        idioma: stepOneData.idioma,
-        privacidad: stepOneData.privacidad,
-        modalidad: stepOneData.modalidad,
-        url_evento: stepOneData.url,
-        direccion: "",
-        latitud: 0,
-        longitud: 0
+      id_creador: localStorage.getItem("id_usuario"),
+      nombre: stepOneData.name,
+      categoria: stepTwoData,
+      hora_inicio: stepOneData.desde,
+      hora_fin: stepOneData.hasta,
+      fecha: stepOneData.fecha,
+      idioma: stepOneData.idioma,
+      privacidad: stepOneData.privacidad,
+      modalidad: stepOneData.modalidad,
+      url_evento: stepOneData.url,
+      direccion: adressData,
+      ...locationData,
     };
     console.log("data", data);
-  
+    console.log(stepOneData.lista);
+    console.log("img", imageData);
     try {
-        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/event/create`, data);
-        console.log('Evento creado:', response.data);
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/event/create`,
+        data
+      );
+      if (response.status == 200 && imageData) {
+        console.log("El evento se ha creado correctamente", response);
+        const id_evento = response.data.id_evento;
+        const formData = new FormData();
+        formData.append("id", localStorage.getItem("id_usuario"));
+        formData.append("file", imageData);
+        try {
+          const response_img = await axios.post(
+            `${
+              import.meta.env.VITE_BACKEND_URL
+            }/api/event/upload?id=${id_evento}`,
+            formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+          if (response_img.status == 200) {
+            console.log("La imagen se ha ingresado correctamente");
+          }
+        } catch (error) {
+          console.error("Error al subir la imagen", error);
+        }
+      }
     } catch (error) {
-        console.error('Error al crear el evento:', error);
+      console.error("Error al crear el evento:", error);
     }
-};
-
+  };
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md mt-5 mx-48">
       <div data-hs-stepper="">
         <ul className="relative flex flex-row gap-x-2">
-          {[1, 2, 3].map((index) => (
+          {[
+            { step: 1, name: "Detalles generales" },
+            { step: 2, name: "Categoría" },
+            { step: 3, name: "Imagen y lugar" },
+          ].map(({ step, name }) => (
             <li
-              key={index}
+              key={step}
               className={`flex items-center gap-x-2 shrink basis-0 flex-1 group ${
-                index === step
+                step === step
                   ? "hs-stepper-active:bg-blue-600 hs-stepper-active:text-white"
                   : ""
               } ${
-                index < step
+                step < step
                   ? "hs-stepper-completed:bg-teal-500 hs-stepper-completed:group-focus:bg-teal-600"
                   : ""
               }`}
-              data-hs-stepper-nav-item={`{"index": ${index}}`}
+              data-hs-stepper-nav-item={`{"index": ${step}}`}
             >
               <span className="min-w-7 min-h-7 group inline-flex items-center text-xs align-middle">
                 <span className="size-7 flex justify-center items-center flex-shrink-0 bg-gray-100 font-medium text-gray-800 rounded-full group-focus:bg-gray-200">
-                  {index}
+                  {step}
                 </span>
                 <span className="ms-2 text-sm font-medium text-gray-800">
-                  Step
+                  {name}
                 </span>
               </span>
               <div className="w-full h-px flex-1 bg-gray-200 group-last:hidden"></div>
             </li>
           ))}
         </ul>
+
         <div className="mt-5 sm:mt-8">
           {[1, 2, 3].map((index) => (
             <div
@@ -124,7 +158,14 @@ const handleFinish = async () => {
                   onChange={(data) => setStepTwoData(data)}
                 />
               )}
-              {index === 3 && <StepThree />}
+              {index === 3 && (
+                <StepThree
+                  modalidad={stepOneData.modalidad}
+                  onLocationSelected={(location) => setLocationData(location)}
+                  onAdressSelected={(address) => setAddressData(address)}
+                  onImageUpload={(image) => setImageData(image)}
+                />
+              )}
             </div>
           ))}
           <div className="mt-5 flex justify-between items-center gap-x-2">
@@ -135,7 +176,7 @@ const handleFinish = async () => {
               data-hs-stepper-back-btn=""
               onClick={handleBack}
             >
-              Back
+              Atrás
             </button>
             <button
               type="button"
@@ -144,7 +185,7 @@ const handleFinish = async () => {
               onClick={handleNext}
               style={{ display: step === 3 ? "none" : "inline-flex" }}
             >
-              Next
+              Siguiente
             </button>
             {step === 3 && (
               <button
@@ -153,7 +194,7 @@ const handleFinish = async () => {
                 data-hs-stepper-finish-btn=""
                 onClick={handleFinish}
               >
-                Finish
+                Crear evento
               </button>
             )}
           </div>
