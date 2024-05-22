@@ -63,6 +63,17 @@ async def save_event_image(id, name, path, db:_orm.Session):
     db.refresh(image_obj)
     return image_obj;
 
+async def save_event_image_default(id, db:_orm.Session):
+    image_obj = event_md.EventosImagenes(
+        id_evento = id,
+        nombre = 'default.jpg',
+        path = '/data/eventImages/default.jpg'
+    )
+    db.add(image_obj)
+    db.commit()
+    db.refresh(image_obj)
+    return image_obj;
+
 async def save_event_guest(id, email, db:_orm.Session):
     existing_user = db.query(user_md.Usuario).filter(user_md.Usuario.correo_electronico == email).first()
     
@@ -82,5 +93,23 @@ async def save_event_guest(id, email, db:_orm.Session):
 
     return id_usuario
 
-    
+async def get_events(db: _orm.Session):
+    return db.query(event_md.EventosDefinicion).\
+        options(
+            _orm.joinedload(event_md.EventosDefinicion.categorias),
+            _orm.joinedload(event_md.EventosDefinicion.idiomas),
+            _orm.joinedload(event_md.EventosDefinicion.privacidades),
+            _orm.joinedload(event_md.EventosDefinicion.modalidades),
+            _orm.joinedload(event_md.EventosDefinicion.imagenes)
+        ).all()
 
+
+async def get_event(id,db: _orm.Session):
+    return db.query(event_md.EventosDefinicion).\
+        options(
+            _orm.joinedload(event_md.EventosDefinicion.categorias),
+            _orm.joinedload(event_md.EventosDefinicion.idiomas),
+            _orm.joinedload(event_md.EventosDefinicion.privacidades),
+            _orm.joinedload(event_md.EventosDefinicion.modalidades),
+            _orm.joinedload(event_md.EventosDefinicion.imagenes)
+        ).filter(event_md.EventosDefinicion.id_evento == id).first()

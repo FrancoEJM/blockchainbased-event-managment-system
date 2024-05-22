@@ -23,6 +23,7 @@ class EventosDefinicion(Base):
     __tablename__= "BLC_EVENTOS"
     id_evento = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_EVENTOS_CREACION.id_evento"), primary_key=True, index=True)
     nombre = _sql.Column(_sql.String)
+    descripcion = _sql.Column(_sql.String)
     categoria = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_CATEGORIA.id_categoria"))
     hora_inicio = _sql.Column(_sql.DateTime, default=None)
     hora_fin = _sql.Column(_sql.DateTime, default=None)

@@ -127,7 +127,7 @@ function StepOne({ modalidad, idioma, privacidad, onUpdate }) {
             Descripcion
           </label>
           <textarea
-            className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3 h-36"
+            className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3 h-36 resize-none"
             id="descripcion"
             name="descripcion"
             type="text"

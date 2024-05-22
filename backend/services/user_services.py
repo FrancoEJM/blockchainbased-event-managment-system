@@ -16,6 +16,9 @@ OAuth2Schema = _security.OAuth2PasswordBearer(tokenUrl="/api/token")
 async def get_user_by_email(email:str, db: _orm.Session):
     return db.query(user_md.Usuario).filter(user_md.Usuario.correo_electronico == email).first()
 
+async def get_user_by_id(id:int, db: _orm.Session):
+    return db.query(user_md.Usuario).filter(user_md.Usuario.id_usuario == id).first()
+
 
 async def create_user(user: user_sch.UserCreate, db: _orm.Session):
     user_obj = user_md.Usuario(

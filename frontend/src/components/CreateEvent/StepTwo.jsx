@@ -43,7 +43,7 @@ function StepTwo({ categorias, onChange }) {
           className={`${
             selectedCategory === category.id
               ? "bg-violet-300 shadow-2xl"
-              : "bg-gray-200"
+              : "bg-white"
           } shadow-md p-4 flex flex-col items-center justify-center text-center cursor-pointer`}
           onClick={() => handleCategoryClick(category.id)}
         >
