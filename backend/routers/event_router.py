@@ -20,8 +20,8 @@ UPLOAD_DIRECTORY = "/data/eventImages/"
 os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
 
 @router.get("/api/events")
-async def get_events_list(db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
-    db_events = await event_sv.get_events(db)
+async def get_events_list(id:int, db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
+    db_events = await event_sv.get_events(id,db)
     return db_events
 
 @router.get("/api/event")

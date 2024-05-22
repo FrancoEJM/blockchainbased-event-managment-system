@@ -93,15 +93,35 @@ async def save_event_guest(id, email, db:_orm.Session):
 
     return id_usuario
 
-async def get_events(db: _orm.Session):
-    return db.query(event_md.EventosDefinicion).\
+# async def get_events(db: _orm.Session):
+#     return db.query(event_md.EventosDefinicion).\
+#         options(
+#             _orm.joinedload(event_md.EventosDefinicion.categorias),
+#             _orm.joinedload(event_md.EventosDefinicion.idiomas),
+#             _orm.joinedload(event_md.EventosDefinicion.privacidades),
+#             _orm.joinedload(event_md.EventosDefinicion.modalidades),
+#             _orm.joinedload(event_md.EventosDefinicion.imagenes)
+#         ).all()
+
+async def get_events(user_id: int, db: _orm.Session):
+    # Subconsulta para obtener los IDs de eventos privados a los que el usuario está invitado
+    invited_events_subquery = db.query(event_user_md.EventoInvitados.id_evento).filter(event_user_md.EventoInvitados.id_usuario == user_id).subquery()
+
+    # Consulta principal para obtener eventos públicos y privados donde el usuario está invitado
+    events_query = db.query(event_md.EventosDefinicion).\
         options(
             _orm.joinedload(event_md.EventosDefinicion.categorias),
             _orm.joinedload(event_md.EventosDefinicion.idiomas),
             _orm.joinedload(event_md.EventosDefinicion.privacidades),
             _orm.joinedload(event_md.EventosDefinicion.modalidades),
             _orm.joinedload(event_md.EventosDefinicion.imagenes)
-        ).all()
+        ).filter(
+            (event_md.EventosDefinicion.privacidad == 1) | 
+            (event_md.EventosDefinicion.id_evento.in_(invited_events_subquery))
+        )
+
+    return events_query.all()
+
 
 
 async def get_event(id,db: _orm.Session):

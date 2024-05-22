@@ -107,7 +107,7 @@ function EventPage() {
                     Evento {event.privacidades.descripcion.toLowerCase()}
                   </span>
                   <span className="font-semibold">
-                    <EventSigningButton />
+                    <EventSigningButton event_id={id}/>
                   </span>
                 </li>
               </ul>

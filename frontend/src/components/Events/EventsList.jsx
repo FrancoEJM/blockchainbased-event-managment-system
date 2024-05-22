@@ -3,12 +3,13 @@ import { Link } from "react-router-dom";
 import { formatDate, formatTime } from "../../utils/utils";
 function EventsList() {
   const [events, setEvents] = useState([]);
-
+  const user_id = localStorage.id_usuario
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/events`
+          `${import.meta.env.VITE_BACKEND_URL}/api/events?id=${user_id}`
+
         );
         if (!response.ok) {
           throw new Error("Error al obtener los eventos");
