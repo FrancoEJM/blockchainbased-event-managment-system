@@ -24,6 +24,11 @@ async def get_events_list(id:int, db: _orm.Session = _fastapi.Depends(db_sv.get_
     db_events = await event_sv.get_events(id,db)
     return db_events
 
+@router.get("/api/user/events")
+async def get_user_events(user_id: int,db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
+    db_user_events = await event_sv.get_user_events(user_id, db)
+    return db_user_events
+
 @router.get("/api/event")
 async def get_event(id,db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
     db_event = await event_sv.get_event(id,db)
@@ -102,4 +107,45 @@ async def send_emails_to_guest():
         print("Error al enviar el correo electrónico:", e)
 
     return(email)
-    
+
+@router.post("/api/event/start")
+async def start_event(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
+    try:
+        started_event = await event_sv.start_event(event_id, db)
+        if started_event:
+            return started_event
+        else:
+            raise _fastapi.HTTPException(status_code=404, detail=f"Event with id {event_id} not found")
+    except Exception as e:
+        raise _fastapi.HTTPException(status_code=500, detail=f"Failed to start event: {str(e)}")
+
+
+@router.post("/api/event/end")
+async def end_event(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
+    try:
+        finished_event = await event_sv.end_event(event_id, db)
+        if finished_event:
+            return finished_event
+        else:
+            raise _fastapi.HTTPException(status_code=404, detail=f"Event with id {event_id} not found")
+    except Exception as e:
+        raise _fastapi.HTTPException(status_code=500, detail=f"Failed to end event: {str(e)}")
+
+
+@router.delete("/api/event")
+async def delete_event(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
+    try:
+        with db.begin():
+            # Delete from BLC_EVENTOS_INVITADOS (multiple records)
+            event_sv.delete_event_invitados(event_id, db)
+            # Delete from BLC_IMAGENES (single record)
+            event_sv.delete_event_imagen(event_id, db)
+            # Delete from BLC_EVENTO_USUARIO (single record)
+            event_sv.delete_event_usuario(event_id, db)
+            # Delete from BLC_EVENTOS (single record)
+            event_sv.delete_event(event_id, db)
+            # Delete from BLC_EVENTOS_CREACION (single record)
+            event_sv.delete_event_creacion(event_id, db)
+        return {"message": f"El evento {event_id} ha sido eliminado."}
+    except Exception as e:
+        raise _fastapi.HTTPException(status_code=500, detail=f"Failed to delete event: {str(e)}")

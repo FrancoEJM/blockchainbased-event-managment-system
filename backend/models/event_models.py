@@ -11,6 +11,7 @@ class Eventos(Base):
     id_evento = _sql.Column(_sql.Integer, primary_key=True, index=True)
     fecha_creacion = _sql.Column(_sql.DateTime, default=_dt.datetime.now(_dt.timezone.utc))
     fecha_ejecucion = _sql.Column(_sql.DateTime, default=None)
+    fecha_finalizacion = _sql.Column(_sql.DateTime, default=None)
     usuario_creador = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_USUARIOS.id_usuario"))
 
     evento = _orm.relationship("EventosDefinicion", back_populates="eventos")
