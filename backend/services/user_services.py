@@ -2,8 +2,9 @@ import fastapi as _fastapi
 import fastapi.security as _security
 import sqlalchemy.orm as _orm
 import passlib.hash as _hash
+import datetime as _dt
 from schemas import user_schemas as user_sch
-from models import user_models as user_md
+from models import user_models as user_md, event_user_models as event_user_md
 from services import database_services as db_sv
 import dotenv, os
 import jwt as _jwt
@@ -54,3 +55,18 @@ async def get_current_user(db: _orm.Session = _fastapi.Depends(db_sv.get_db), to
         raise _fastapi.HTTPException(status_code=_fastapi.status.HTTP_401_UNAUTHORIZED, detail="Correo o contraseña incorrectos")
     
     return user_sch.User.model_validate(user)
+
+
+async def save_attendee_data(event_id: int, gender: int, fullname: str, birthdate: _dt.date, db:_orm.Session):
+    birth_datetime = _dt.datetime.combine(birthdate, _dt.time.min)
+    attendee_data_obj = event_user_md.EventoUsuario(
+        id_usuario = 0,
+        id_evento = event_id,
+        genero = gender,
+        nombre_completo = fullname,
+        fecha_nacimiento = birth_datetime
+    )
+    db.add(attendee_data_obj)
+    db.commit()
+    db.refresh(attendee_data_obj)
+    return attendee_data_obj

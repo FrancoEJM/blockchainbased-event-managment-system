@@ -36,7 +36,6 @@ function LoginForm() {
           let token = res.data.access_token;
           localStorage.setItem("token", token);
           setId(localStorage.getItem("token"));
-          loginRedirect();
         }
       })
       .catch((err) => console.log(err));
@@ -64,6 +63,7 @@ function LoginForm() {
       );
       const id_usuario = response.data.id_usuario;
       localStorage.setItem("id_usuario", id_usuario);
+      loginRedirect();
     } catch (error) {
       console.error(error);
       throw new Error("No se pudo obtener el ID de usuario");

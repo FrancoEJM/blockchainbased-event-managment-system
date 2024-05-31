@@ -1,14 +1,16 @@
 import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Events } from "./pages/Events";
 import { Event } from "./pages/Events";
 import { MyEvents } from "./pages/Events";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CreateEvent } from "./pages/CreateEvent";
 import { Profile } from "./pages/Profile";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { DataCollection } from "./pages/DataCollection";
 
 function App() {
   return (
@@ -23,6 +25,7 @@ function App() {
           <Route path="/created" element={<MyEvents />}></Route>
           <Route path="/new-event" element={<CreateEvent />} />
           <Route path="/me" element={<Profile />} />
+          <Route path="/data/:event_id" element={<DataCollection />} />
           <Route path="*" element={<h1>Not Found</h1>} />
         </Routes>
       </BrowserRouter>

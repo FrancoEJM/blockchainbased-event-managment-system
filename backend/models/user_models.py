@@ -25,7 +25,7 @@ class Usuario(Base):
 
     generos = _orm.relationship("Genero", back_populates="propietario")
 
-    inscripcion = _orm.relationship("EventoUsuario", back_populates="usuario")
+    asistente = _orm.relationship("EventoUsuario", back_populates="usuario")
     recurso = _orm.relationship("EventoRecursos", back_populates="usuario")
     invitado = _orm.relationship("EventoInvitados", back_populates="usuario")
 

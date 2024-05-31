@@ -64,10 +64,8 @@ async def create_event(id:int, event: event_sch.EventCreate, db: _orm.Session):
 async def start_event(event_id: int, db: _orm.Session):
     try:
         event_obj = db.query(event_md.Eventos).filter_by(id_evento=event_id).first()
-        
         if event_obj:
             event_obj.fecha_ejecucion = _dt.datetime.now(_dt.timezone.utc)
-
             db.commit()
             db.refresh(event_obj)
             return event_obj
@@ -171,9 +169,7 @@ async def get_events(user_id: int, db: _orm.Session):
 #     )
 #     return events
 
-from typing import List, Tuple
-
-async def get_user_events(user_id: int, db: _orm.Session) -> List[dict]:
+async def get_user_events(user_id: int, db: _orm.Session) -> _typing.List[dict]:
     events = (
         db.query(event_md.EventosDefinicion, event_md.Eventos.fecha_ejecucion, event_md.Eventos.fecha_finalizacion)
         .join(event_md.Eventos)
@@ -210,22 +206,37 @@ async def get_event(id,db: _orm.Session):
         ).filter(event_md.EventosDefinicion.id_evento == id).first()
 
 
-def delete_event_invitados(event_id: int, db: _orm.Session):
+async def delete_event_invitados(event_id: int, db: _orm.Session):
     db.query(event_user_md.EventoInvitados).filter(event_user_md.EventoInvitados.id_evento == event_id).delete()
 
 
-def delete_event_imagen(event_id: int, db: _orm.Session):
+async def delete_event_imagen(event_id: int, db: _orm.Session):
     db.query(event_md.EventosImagenes).filter(event_md.EventosImagenes.id_evento == event_id).delete()
 
 
-def delete_event_usuario(event_id: int, db: _orm.Session):
+async def delete_event_usuario(event_id: int, db: _orm.Session):
     db.query(event_user_md.EventoUsuario).filter(event_user_md.EventoUsuario.id_evento == event_id).delete()
 
 
-def delete_event(event_id: int, db: _orm.Session):
+async def delete_event(event_id: int, db: _orm.Session):
     db.query(event_md.EventosDefinicion).filter(event_md.EventosDefinicion.id_evento == event_id).delete()
 
 
-def delete_event_creacion(event_id: int, db: _orm.Session):
+async def delete_event_creacion(event_id: int, db: _orm.Session):
     db.query(event_md.Eventos).filter(event_md.Eventos.id_evento == event_id).delete()
-    
+
+
+async def save_qr_database(path: str, event_id: int, db: _orm.Session):
+    qr_object = event_md.EventosQRPublicos(
+        id_qr = event_id,
+        id_evento = event_id,
+        path = f"/{path}"
+    )
+    db.add(qr_object)
+    try:
+        db.commit()
+        db.refresh(qr_object)
+        return qr_object
+    except Exception as e:
+        db.rollback()
+        raise _fastapi.HTTPException(status_code=404, detail="El evento especificado no existe")

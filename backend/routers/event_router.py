@@ -11,6 +11,7 @@ from models import event_models as event_md
 
 import dotenv,os
 import resend
+import qrcode
 
 router = _fastapi.APIRouter()
 
@@ -112,7 +113,9 @@ async def send_emails_to_guest():
 async def start_event(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
     try:
         started_event = await event_sv.start_event(event_id, db)
-        if started_event:
+        event_features = await event_sv.get_event(event_id, db)
+        if started_event and event_features.privacidad == 1:
+            await create_public_qr_code(event_id,db)
             return started_event
         else:
             raise _fastapi.HTTPException(status_code=404, detail=f"Event with id {event_id} not found")
@@ -137,15 +140,41 @@ async def delete_event(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.
     try:
         with db.begin():
             # Delete from BLC_EVENTOS_INVITADOS (multiple records)
-            event_sv.delete_event_invitados(event_id, db)
+            await event_sv.delete_event_invitados(event_id, db)
             # Delete from BLC_IMAGENES (single record)
-            event_sv.delete_event_imagen(event_id, db)
+            await event_sv.delete_event_imagen(event_id, db)
             # Delete from BLC_EVENTO_USUARIO (single record)
-            event_sv.delete_event_usuario(event_id, db)
+            await event_sv.delete_event_usuario(event_id, db)
             # Delete from BLC_EVENTOS (single record)
-            event_sv.delete_event(event_id, db)
+            await event_sv.delete_event(event_id, db)
             # Delete from BLC_EVENTOS_CREACION (single record)
-            event_sv.delete_event_creacion(event_id, db)
+            await event_sv.delete_event_creacion(event_id, db)
         return {"message": f"El evento {event_id} ha sido eliminado."}
     except Exception as e:
         raise _fastapi.HTTPException(status_code=500, detail=f"Failed to delete event: {str(e)}")
+
+@router.post("/api/create-qr-code")
+async def create_public_qr_code(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
+    frontend_url = os.getenv("FRONTEND_URL")
+    qr_url = f"{frontend_url}/data/{event_id}"
+
+    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
+    qr.add_data(qr_url)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white")
+
+    qr_img_path = f"data/publicQRImages/event_{event_id}_qr.png"
+    qr_img.save(qr_img_path)
+
+    qr_db = await event_sv.save_qr_database(qr_img_path, event_id, db)
+
+    if qr_db is None:
+        raise _fastapi.HTTPException(status_code=500, detail="Error al guardar el código QR en la base de datos")
+
+    return {"qr_image_path": qr_img_path, "qr_url": qr_url, "qr_db": qr_db.id_qr}
+
+
+@router.get("/get-qr/{qr_image_path:path}")
+async def get_qr(qr_image_path: str):
+    # Devolver la imagen del QR
+    return _fastapi.FileResponse(qr_image_path)

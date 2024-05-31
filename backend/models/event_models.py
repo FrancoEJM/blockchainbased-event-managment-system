@@ -16,7 +16,7 @@ class Eventos(Base):
 
     evento = _orm.relationship("EventosDefinicion", back_populates="eventos")
     
-    inscripcion = _orm.relationship("EventoUsuario", back_populates="evento")
+    asistente = _orm.relationship("EventoUsuario", back_populates="evento")
     recurso = _orm.relationship("EventoRecursos", back_populates="evento")
     invitado = _orm.relationship("EventoInvitados", back_populates="evento")
 
@@ -46,6 +46,8 @@ class EventosDefinicion(Base):
     modalidades = _orm.relationship("EventosModalidad", back_populates="modalidad")
 
     imagenes = _orm.relationship("EventosImagenes", back_populates="imagen")
+
+    qrs_publicos = _orm.relationship("EventosQRPublicos", back_populates="qr_publico")
 
     parametros = _orm.relationship("EventosParametros", back_populates="parametro")
 
@@ -85,6 +87,14 @@ class EventosImagenes(Base):
     path = _sql.Column(_sql.String)
 
     imagen = _orm.relationship("EventosDefinicion", back_populates="imagenes")
+
+class EventosQRPublicos(Base):
+    __tablename__ = "BLC_QR_PUBLICO"
+    id_qr = _sql.Column(_sql.Integer, primary_key=True, index=True)
+    id_evento = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_EVENTOS.id_evento"))
+    path = _sql.Column(_sql.String)
+
+    qr_publico = _orm.relationship("EventosDefinicion", back_populates="qrs_publicos")
 
 class EventosParametros(Base):
     __tablename__ = "BLC_PARAMETROS"

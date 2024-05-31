@@ -19,3 +19,12 @@ class User(_UserBase):
 
     class Config:
         from_attributes = True
+
+class AttendeeDetails(_pydantic.BaseModel):
+    event_id: int
+    gender: int
+    fullname: str
+    birthdate: _dt.date
+
+    class Config:
+        from_attributes = True

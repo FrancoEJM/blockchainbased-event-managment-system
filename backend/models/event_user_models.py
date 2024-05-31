@@ -8,16 +8,20 @@ import sqlalchemy.orm as _orm
 
 class EventoUsuario(Base):
     __tablename__= "BLC_EVENTO_USUARIO"
-    id_evento = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_EVENTOS_CREACION.id_evento"), primary_key=True, index=True)
-    id_usuario = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_USUARIOS.id_usuario"), primary_key=True, index=True)
-    invitado = _sql.Column(_sql.Boolean, default=False)
-    correo_electronico = _sql.Column(_sql.String)
-    fecha_inscripcion = _sql.Column(_sql.DateTime, default=_dt.datetime.now(_dt.timezone.utc))
+    id_entrada = _sql.Column(_sql.Integer, primary_key=True, index=True)
+    id_evento = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_EVENTOS_CREACION.id_evento"), index=True)
+    id_usuario = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_USUARIOS.id_usuario"), default=0, index=True)
+    genero = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_GENERO.id_genero"), default=0)
+    fecha_nacimiento = _sql.Column(_sql.DateTime, default=None)
+    nombre_completo = _sql.Column(_sql.String, default=None)
+    fecha_inscripcion = _sql.Column(_sql.DateTime, default=None)
     fecha_baja = _sql.Column(_sql.DateTime, default=None)
     fecha_arribo = _sql.Column(_sql.DateTime, default=None)
+    correo_electronico = _sql.Column(_sql.String, default=None)
+    invitado = _sql.Column(_sql.Boolean, default=False)
 
-    evento = _orm.relationship("Eventos", back_populates="inscripcion")
-    usuario = _orm.relationship("Usuario", back_populates="inscripcion")
+    evento = _orm.relationship("Eventos", back_populates="asistente")
+    usuario = _orm.relationship("Usuario", back_populates="asistente")
 
 class EventoRecursos(Base):
     __tablename__= "BLC_EVENTOS_RECURSOS"
