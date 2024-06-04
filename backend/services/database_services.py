@@ -1,7 +1,6 @@
 import sys
 import os
 
-# Agregar el directorio al PYTHONPATH
 database_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(database_dir)
 
@@ -17,6 +16,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-create_db()

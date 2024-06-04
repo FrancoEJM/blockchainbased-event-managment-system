@@ -64,11 +64,12 @@ async def create_event(id:int, event: event_sch.EventCreate, db: _orm.Session):
 async def start_event(event_id: int, db: _orm.Session):
     try:
         event_obj = db.query(event_md.Eventos).filter_by(id_evento=event_id).first()
+        print(event_obj);
         if event_obj:
             event_obj.fecha_ejecucion = _dt.datetime.now(_dt.timezone.utc)
             db.commit()
             db.refresh(event_obj)
-            return event_obj
+            return event_obj.fecha_ejecucion
         else:
             return None  # Evento no encontrado, manejar esto en el endpoint
     except Exception as e:
@@ -87,7 +88,6 @@ async def end_event(event_id: int, db: _orm.Session):
             return None
     except Exception as e:
         raise e  # Propaga la excepción
-
 
 
 async def save_event_image(id, name, path, db:_orm.Session):
@@ -179,7 +179,8 @@ async def get_user_events(user_id: int, db: _orm.Session) -> _typing.List[dict]:
             _orm.joinedload(event_md.EventosDefinicion.idiomas),
             _orm.joinedload(event_md.EventosDefinicion.privacidades),
             _orm.joinedload(event_md.EventosDefinicion.modalidades),
-            _orm.joinedload(event_md.EventosDefinicion.imagenes)
+            _orm.joinedload(event_md.EventosDefinicion.imagenes),
+            _orm.joinedload(event_md.EventosDefinicion.qrs_publicos)
         )
         .all()
     )
@@ -202,7 +203,8 @@ async def get_event(id,db: _orm.Session):
             _orm.joinedload(event_md.EventosDefinicion.idiomas),
             _orm.joinedload(event_md.EventosDefinicion.privacidades),
             _orm.joinedload(event_md.EventosDefinicion.modalidades),
-            _orm.joinedload(event_md.EventosDefinicion.imagenes)
+            _orm.joinedload(event_md.EventosDefinicion.imagenes),
+            _orm.joinedload(event_md.EventosDefinicion.qrs_publicos)
         ).filter(event_md.EventosDefinicion.id_evento == id).first()
 
 
@@ -230,7 +232,7 @@ async def save_qr_database(path: str, event_id: int, db: _orm.Session):
     qr_object = event_md.EventosQRPublicos(
         id_qr = event_id,
         id_evento = event_id,
-        path = f"/{path}"
+        path = path
     )
     db.add(qr_object)
     try:
@@ -239,4 +241,5 @@ async def save_qr_database(path: str, event_id: int, db: _orm.Session):
         return qr_object
     except Exception as e:
         db.rollback()
-        raise _fastapi.HTTPException(status_code=404, detail="El evento especificado no existe")
+        print(f"Error al guardar QR en la base de datos: {str(e)}")
+        raise _fastapi.HTTPException(status_code=404, detail="El evento especificado no existe para guardar el QR")

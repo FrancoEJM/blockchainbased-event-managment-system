@@ -112,11 +112,13 @@ async def send_emails_to_guest():
 @router.post("/api/event/start")
 async def start_event(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
     try:
-        started_event = await event_sv.start_event(event_id, db)
+        execution_date = await event_sv.start_event(event_id, db)
         event_features = await event_sv.get_event(event_id, db)
-        if started_event and event_features.privacidad == 1:
-            await create_public_qr_code(event_id,db)
-            return started_event
+        if execution_date and event_features.privacidad == 1:
+            qr_data = await create_public_qr_code(event_id,db)
+            return execution_date, qr_data["qr_image_path"]
+        elif execution_date and event_features.privacidad == 2:
+            return {"es":"privado"} 
         else:
             raise _fastapi.HTTPException(status_code=404, detail=f"Event with id {event_id} not found")
     except Exception as e:
@@ -177,4 +179,4 @@ async def create_public_qr_code(event_id: int, db: _orm.Session = _fastapi.Depen
 @router.get("/get-qr/{qr_image_path:path}")
 async def get_qr(qr_image_path: str):
     # Devolver la imagen del QR
-    return _fastapi.FileResponse(qr_image_path)
+    return _fastapi.responses.FileResponse(qr_image_path)

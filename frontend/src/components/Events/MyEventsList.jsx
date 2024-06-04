@@ -6,14 +6,17 @@ import Edit from "../icons/Edit";
 import StartEvent from "../icons/StartEvent";
 import DeleteEventButton from "./DeleteEventButton";
 import EndEvent from "../icons/EndEvent";
+import StartEventButton from "./StartEventButton";
+import QrCodeButton from "./QrCodeButton";
+import EndEventButton from "./EndEventButton";
 
 const MyEventsList = ({ user_id }) => {
   const [events, setEvents] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
+  const [qrUrl, setQrUrl] = useState(null);
 
   useEffect(() => {
-    console.log("sucede el useEffect");
     const fetchEvents = async () => {
       try {
         const response = await axios.get(
@@ -24,9 +27,8 @@ const MyEventsList = ({ user_id }) => {
             },
           }
         );
-
-        console.log(response.data);
         setEvents(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error("Error fetching events:", error);
       }
@@ -52,15 +54,46 @@ const MyEventsList = ({ user_id }) => {
     setEvents(updatedEvents);
   };
 
+  const handleStartEventSuccess = (url) => {
+    setQrUrl(url);
+  };
+
+  const handleStartEvent = async (event_id, execution_date, array_qr_data) => {
+    setEvents((prevEvents) =>
+      prevEvents.map((evento) =>
+        evento.id_evento === event_id
+          ? {
+              ...evento,
+              fecha_ejecucion: execution_date,
+              qrs_publicos: array_qr_data,
+            }
+          : evento
+      )
+    );
+  };
+
+  const handleEndEvent = async (event_id, end_date) => {
+    setEvents((prevEvents) =>
+      prevEvents.map((evento) =>
+        evento.id_evento === event_id
+          ? {
+              ...evento,
+              fecha_finalizacion: end_date,
+            }
+          : evento
+      )
+    );
+  };
+
   if (events === null) {
-    return <div>Cargando eventos...</div>; // Mensaje de carga mientras se obtienen los datos
+    return <div>Cargando eventos...</div>;
   }
 
   return (
     <>
       {events.map((evento) => (
         <div key={evento.id_evento} className="flex justify-center mx-5">
-          <div className="w-full relative flex bg-clip-border bg-white text-gray-700 shadow-md max-w-6xl flex-row max-h-80 mt-5">
+          <div className="w-full relative flex bg-clip-border bg-white text-gray-700 shadow-md max-w-6xl flex-row max-h-96 mt-5">
             <div className="relative w-2/5 m-0 overflow-hidden text-gray-700 bg-white rounded-r-none bg-clip-border shrink-0">
               {evento.imagenes.length > 0 && (
                 <img
@@ -94,7 +127,7 @@ const MyEventsList = ({ user_id }) => {
                   : evento.descripcion.slice(0, 170) + "..."}
               </p>
               <div className="grid grid-cols-4 gap-4">
-                <div className="col-span-3">
+                <div className="col-span-2">
                   <div className="grid grid-rows-4 gap-2">
                     <div className="row-span-1 flex items-center">
                       <div className="font-semibold">Fecha:</div>
@@ -133,54 +166,40 @@ const MyEventsList = ({ user_id }) => {
                     </div>
                   </div>
                 </div>
-                <div className="col-span-1 row-span-3 items-center justify-between">
+                <div className="col-span-2 col-start-3 row-span-3 flex items-center justify-end">
                   <button
-                    className="py-4"
+                    className="mr-4"
                     title="Eliminar el evento"
                     onClick={() => openConfirmModal(evento.id_evento)}
                   >
-                    <Trash />
+                    {evento.fecha_ejecucion == null && <Trash />}
                   </button>
                   {evento.fecha_ejecucion == null &&
                     evento.fecha_finalizacion == null && (
-                      <button className="py-4 mx-1" title="Editar el evento">
+                      <button className=" " title="Editar el evento">
                         <Edit />
                       </button>
                     )}
 
                   {evento.fecha_ejecucion == null && (
-                    <button
-                      className="p-4 ml-4 bg-violet-300 rounded-full"
-                      title="Comenzar el evento"
-                    >
-                      <StartEvent />
-                    </button>
+                    <StartEventButton
+                      event={evento}
+                      onStartEvent={handleStartEvent}
+                      onStartEventSuccess={handleStartEventSuccess}
+                    />
                   )}
                   {evento.fecha_ejecucion != null &&
                     evento.fecha_finalizacion == null && (
-                      <button
-                        className="p-4 ml-4 bg-green-100 rounded-full"
-                        title="Finalizar el evento"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="icon icon-tabler icon-tabler-clock-12"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="#2c3e50"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M3 12a9 9 0 0 0 9 9m9 -9a9 9 0 1 0 -18 0" />
-                          <path d="M12 7v5l.5 .5" />
-                          <path d="M18 15h2a1 1 0 0 1 1 1v1a1 1 0 0 1 -1 1h-1a1 1 0 0 0 -1 1v1a1 1 0 0 0 1 1h2" />
-                          <path d="M15 21v-6" />
-                        </svg>
-                      </button>
+                      <>
+                        <QrCodeButton
+                          events={events}
+                          event_id={evento.id_evento}
+                        />
+                        <EndEventButton
+                          event_id={evento.id_evento}
+                          onEndEvent={handleEndEvent}
+                        />
+                      </>
                     )}
                   {evento.fecha_finalizacion != null && (
                     <button
@@ -189,7 +208,7 @@ const MyEventsList = ({ user_id }) => {
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="icon icon-tabler icon-tabler-device-desktop-analytics"
+                        className="icon icon-tabler icon-tabler-device-desktop-analytics"
                         width="24"
                         height="24"
                         viewBox="0 0 24 24"
