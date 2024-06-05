@@ -1,63 +1,89 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import es from "date-fns/locale/es";
-
 import "react-datepicker/dist/react-datepicker.css";
 import "./styles.css";
 
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
+const schema = yup.object().shape({
+  name: yup.string().required("El nombre es requerido"),
+  lastname: yup.string().required("El apellido es requerido"),
+  email: yup
+    .string()
+    .email("Correo electrónico no válido")
+    .required("El correo electrónico es requerido"),
+  phone_number: yup
+    .string()
+    .length(8, "El número telefónico debe tener 8 caracteres")
+    .required("El número telefónico es requerido"),
+  password: yup
+    .string()
+    .min(6, "La contraseña debe tener al menos 6 caracteres")
+    .required("La contraseña es requerida"),
+  password_c: yup
+    .string()
+    .oneOf([yup.ref("password"), null], "Las contraseñas no coinciden")
+    .required("La confirmación de la contraseña es requerida"),
+  birthdate: yup.date().required("La fecha de nacimiento es requerida"),
+});
+
 function RegisterForm() {
-  const [values, setValues] = useState({
-    name: "",
-    lastname: "",
-    email: "",
-    phone_number: "",
-    password: "",
-    password_c: "",
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    setError,
+  } = useForm({
+    resolver: yupResolver(schema),
   });
 
-  const [birthdate, setBirthdate] = useState(null);
+  const navigate = useNavigate();
 
-  const handleDateChange = (date) => {
-    setBirthdate(date);
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setValues({
-      ...values,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const mappedValues = mapFields(values);
+  const onSubmit = (data) => {
+    const mappedValues = mapFields(data);
     axios({
       url: import.meta.env.VITE_BACKEND_URL + "/api/users",
       method: "POST",
       data: mappedValues,
     })
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           handleRedirect();
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        if (err.response && err.response.status === 400) {
+          setError("email", {
+            type: "manual",
+            message: "El correo electrónico ya está en uso",
+          });
+        } else {
+          setError("email", {
+            type: "manual",
+            message: "Error en la solicitud",
+          });
+        }
+      });
   };
 
-  const navigate = useNavigate();
   const handleRedirect = () => {
     navigate("/");
   };
 
   const mapFields = (values) => {
-    const formattedBirthdate = birthdate
-      ? `${birthdate.getFullYear()}-${(birthdate.getMonth() + 1)
+    const formattedBirthdate = values.birthdate
+      ? `${values.birthdate.getFullYear()}-${(values.birthdate.getMonth() + 1)
           .toString()
-          .padStart(2, "0")}-${birthdate.getDate().toString().padStart(2, "0")}`
+          .padStart(2, "0")}-${values.birthdate
+          .getDate()
+          .toString()
+          .padStart(2, "0")}`
       : "";
 
     return {
@@ -71,7 +97,7 @@ function RegisterForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="mt-8">
       <div className="grid grid-cols-2 gap-6">
         <div className="col-span-2 sm:col-span-1">
           <label htmlFor="name" className="font-medium text-gray-700 mb-2">
@@ -82,9 +108,14 @@ function RegisterForm() {
             name="name"
             id="name"
             placeholder="Ingresa tu nombre"
-            onChange={handleInputChange}
-            className="w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none focus:border-violet-400"
+            {...register("name")}
+            className={`w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none ${
+              errors.name ? "border-red-500" : "focus:border-violet-400"
+            }`}
           />
+          {errors.name && (
+            <p className="text-red-500 text-sm">{errors.name.message}</p>
+          )}
         </div>
         <div className="col-span-2 sm:col-span-1">
           <label htmlFor="lastname" className="font-medium text-gray-700 mb-2">
@@ -95,9 +126,14 @@ function RegisterForm() {
             name="lastname"
             id="lastname"
             placeholder="Ingresa tu apellido"
-            onChange={handleInputChange}
-            className="w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none focus:border-violet-400"
+            {...register("lastname")}
+            className={`w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none ${
+              errors.lastname ? "border-red-500" : "focus:border-violet-400"
+            }`}
           />
+          {errors.lastname && (
+            <p className="text-red-500 text-sm">{errors.lastname.message}</p>
+          )}
         </div>
       </div>
 
@@ -109,10 +145,15 @@ function RegisterForm() {
           type="email"
           name="email"
           id="email"
-          onChange={handleInputChange}
-          className="w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none focus:border-violet-400"
+          {...register("email")}
+          className={`w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none ${
+            errors.email ? "border-red-500" : "focus:border-violet-400"
+          }`}
           placeholder="Ingresa tu correo electrónico"
         />
+        {errors.email && (
+          <p className="text-red-500 text-sm">{errors.email.message}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-6">
@@ -121,17 +162,28 @@ function RegisterForm() {
             <label className="font-medium text-gray-700 mb-2">
               Fecha de nacimiento
             </label>
-            <DatePicker
-              selected={birthdate}
-              onChange={handleDateChange}
+            <Controller
               name="birthdate"
-              id="birthdate"
-              dateFormat="dd/MM/yyyy"
-              placeholderText="dd/mm/yyyy"
-              locale={es}
-              style={{ width: "100% !important" }}
-              className="w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none focus:border-violet-400"
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  {...field}
+                  selected={field.value}
+                  onChange={(date) => field.onChange(date)}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="dd/mm/yyyy"
+                  locale={es}
+                  className={`w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none ${
+                    errors.birthdate
+                      ? "border-red-500"
+                      : "focus:border-violet-400"
+                  }`}
+                />
+              )}
             />
+            {errors.birthdate && (
+              <p className="text-red-500 text-sm">{errors.birthdate.message}</p>
+            )}
           </div>
         </div>
         <div className="col-span-2 sm:col-span-1">
@@ -147,11 +199,20 @@ function RegisterForm() {
                 type="text"
                 name="phone_number"
                 id="phone_number"
-                className="w-full py-3 px-4 border-0 rounded-r-lg focus:outline-none focus:ring-0"
+                {...register("phone_number")}
+                className={`w-full py-3 px-4 border-0 rounded-r-lg focus:outline-none focus:ring-0 ${
+                  errors.phone_number
+                    ? "border-red-500"
+                    : "focus:border-violet-400"
+                }`}
                 placeholder="Ingrese su número"
-                onChange={handleInputChange}
               />
             </div>
+            {errors.phone_number && (
+              <p className="text-red-500 text-sm">
+                {errors.phone_number.message}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -163,9 +224,14 @@ function RegisterForm() {
           name="password"
           id="password"
           placeholder="Ingresa tu contraseña"
-          onChange={handleInputChange}
-          className="w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none focus:border-violet-400"
+          {...register("password")}
+          className={`w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none ${
+            errors.password ? "border-red-500" : "focus:border-violet-400"
+          }`}
         />
+        {errors.password && (
+          <p className="text-red-500 text-sm">{errors.password.message}</p>
+        )}
       </div>
 
       <div className="pt-3">
@@ -177,9 +243,14 @@ function RegisterForm() {
           name="password_c"
           id="password_c"
           placeholder="Ingresa tu contraseña nuevamente"
-          onChange={handleInputChange}
-          className="w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none focus:border-violet-400"
+          {...register("password_c")}
+          className={`w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none ${
+            errors.password_c ? "border-red-500" : "focus:border-violet-400"
+          }`}
         />
+        {errors.password_c && (
+          <p className="text-red-500 text-sm">{errors.password_c.message}</p>
+        )}
       </div>
 
       <div className="mt-8 flex justify-center h-12">
@@ -204,4 +275,5 @@ function RegisterForm() {
     </form>
   );
 }
+
 export default RegisterForm;
