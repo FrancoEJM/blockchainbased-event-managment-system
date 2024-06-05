@@ -27,7 +27,8 @@ async def create_user(user: user_sch.UserCreate, db: _orm.Session):
         hash_contrasena = _hash.bcrypt.hash(user.hash_contrasena),
         nombre = user.nombre,
         apellido = user.apellido,
-        fecha_nacimiento = user.fecha_nacimiento 
+        fecha_nacimiento = user.fecha_nacimiento,
+        telefono = user.telefono
     )
     db.add(user_obj)
     db.commit()

@@ -22,6 +22,7 @@ class Usuario(Base):
     comuna = _sql.Column(_sql.String, default="")
     region = _sql.Column(_sql.String, default="")
     nacionalidad = _sql.Column(_sql.String, default="")
+    telefono = _sql.Column(_sql.Integer, default="")
 
     generos = _orm.relationship("Genero", back_populates="propietario")
 

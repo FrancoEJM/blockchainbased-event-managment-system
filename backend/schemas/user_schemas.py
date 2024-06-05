@@ -10,6 +10,7 @@ class UserCreate(_UserBase):
     nombre: str
     apellido: str
     fecha_nacimiento: _dt.date
+    telefono: int
 
     class Config:
         from_attributes = True

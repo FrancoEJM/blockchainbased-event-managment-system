@@ -13,6 +13,7 @@ function RegisterForm() {
     name: "",
     lastname: "",
     email: "",
+    phone_number: "",
     password: "",
     password_c: "",
   });
@@ -64,43 +65,39 @@ function RegisterForm() {
       hash_contrasena: values.password,
       nombre: values.name,
       apellido: values.lastname,
+      telefono: values.phone_number,
       fecha_nacimiento: formattedBirthdate,
     };
   };
 
   return (
     <form onSubmit={handleSubmit} className="mt-8">
-      <div className="flex">
-        <div className="grid grid-cols-2 gap-6">
-          <div className="col-span-4 sm:col-span-1">
-            <label htmlFor="name" className="font-medium text-gray-700 mb-2">
-              Nombre
-            </label>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              placeholder="Ingresa tu nombre"
-              onChange={handleInputChange}
-              className="w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none focus:border-violet-400"
-            />
-          </div>
-          <div className="col-span-2 sm:col-span-1">
-            <label
-              htmlFor="lastname"
-              className="font-medium text-gray-700 mb-2"
-            >
-              Apellido
-            </label>
-            <input
-              type="text"
-              name="lastname"
-              id="lastname"
-              placeholder="Ingresa tu apellido"
-              onChange={handleInputChange}
-              className="w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none focus:border-violet-400"
-            />
-          </div>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="col-span-2 sm:col-span-1">
+          <label htmlFor="name" className="font-medium text-gray-700 mb-2">
+            Nombre
+          </label>
+          <input
+            type="text"
+            name="name"
+            id="name"
+            placeholder="Ingresa tu nombre"
+            onChange={handleInputChange}
+            className="w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none focus:border-violet-400"
+          />
+        </div>
+        <div className="col-span-2 sm:col-span-1">
+          <label htmlFor="lastname" className="font-medium text-gray-700 mb-2">
+            Apellido
+          </label>
+          <input
+            type="text"
+            name="lastname"
+            id="lastname"
+            placeholder="Ingresa tu apellido"
+            onChange={handleInputChange}
+            className="w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none focus:border-violet-400"
+          />
         </div>
       </div>
 
@@ -118,22 +115,45 @@ function RegisterForm() {
         />
       </div>
 
-      <div className="pt-3">
-        <label className="font-medium text-gray-700 mb-2">
-          Fecha de nacimiento
-        </label>
-
-        <DatePicker
-          selected={birthdate}
-          onChange={handleDateChange}
-          name="birthdate"
-          id="birthdate"
-          dateFormat="dd/MM/yyyy"
-          placeholderText="dd/mm/yyyy"
-          locale={es}
-          style={{ width: "100% !important" }}
-          className="w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none focus:border-violet-400"
-        />
+      <div className="grid grid-cols-2 gap-6">
+        <div className="col-span-2 sm:col-span-1">
+          <div className="pt-3">
+            <label className="font-medium text-gray-700 mb-2">
+              Fecha de nacimiento
+            </label>
+            <DatePicker
+              selected={birthdate}
+              onChange={handleDateChange}
+              name="birthdate"
+              id="birthdate"
+              dateFormat="dd/MM/yyyy"
+              placeholderText="dd/mm/yyyy"
+              locale={es}
+              style={{ width: "100% !important" }}
+              className="w-full py-3 px-4 mt-1 mb-3 border border-gray-400 rounded-lg focus:outline-none focus:border-violet-400"
+            />
+          </div>
+        </div>
+        <div className="col-span-2 sm:col-span-1">
+          <div className="pt-3">
+            <label className="font-medium text-gray-700 mb-2">
+              Número telefónico
+            </label>
+            <div className="flex items-center w-full mt-1 mb-3 border border-gray-400 rounded-lg focus-within:border-violet-400">
+              <span className="px-4 py-3 bg-gray-100 border-r border-gray-400 rounded-l-lg">
+                +56
+              </span>
+              <input
+                type="text"
+                name="phone_number"
+                id="phone_number"
+                className="w-full py-3 px-4 border-0 rounded-r-lg focus:outline-none focus:ring-0"
+                placeholder="Ingrese su número"
+                onChange={handleInputChange}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="pt-3">
@@ -165,7 +185,7 @@ function RegisterForm() {
       <div className="mt-8 flex justify-center h-12">
         <button
           type="submit"
-          className=" active:scale-[.99] active:duration-75 hover:scale-[1.01] transition-all bg-violet-400 text-white rounded-3xl w-2/3 text-lg font-bold"
+          className="active:scale-[.99] active:duration-75 hover:scale-[1.01] transition-all bg-violet-400 text-white rounded-3xl w-2/3 text-lg font-bold"
         >
           Registrarse
         </button>
