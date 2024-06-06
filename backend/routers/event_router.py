@@ -6,7 +6,7 @@ import sqlalchemy.orm as _orm
 import services as _services, schemas as _schemas
 
 from schemas import user_schemas as user_sch, event_schemas as event_sch
-from services import database_services as db_sv, user_services as user_sv, token_services as token_sv, event_services as event_sv
+from services import database_services as db_sv, user_services as user_sv, token_services as token_sv, event_services as event_sv, util_services as util_sv
 from models import event_models as event_md
 
 import dotenv,os
@@ -17,6 +17,7 @@ router = _fastapi.APIRouter()
 
 dotenv.load_dotenv()
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 UPLOAD_DIRECTORY = "/data/eventImages/"
 os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
 
@@ -82,13 +83,20 @@ async def upload_event_image_default(id: int, db: _orm.Session = _fastapi.Depend
     
 @router.post("/api/event/guests")
 async def upload_guests_list(event_id: int,q: _typing.List[str] = _fastapi.Query(None), db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
-    responses = []
-
+    db_responses = []
+    smtp_responses = []
+    event = await event_sv.get_event(event_id, db)
+    event_name = event.nombre
+    url_redirect = f"{FRONTEND_URL}/"
     for i in range(len(q)):
         id_usuario = await event_sv.save_event_guest(event_id, q[i], db)
-        responses.append({"email": q[i], "id_usuario": id_usuario})
+        db_responses.append({"email": q[i], "id_usuario": id_usuario})
+    
+    for i in range(len(q)):
+        correo = await util_sv.send_invitation_email(q[i], event_name, url_redirect)
+        smtp_responses.append({"status": correo["mensaje"]})
 
-    return {"responses": responses}
+    return {"db": db_responses, "smtp": smtp_responses} 
 
 @router.post("/api/event/mail")
 async def send_emails_to_guest():
