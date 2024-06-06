@@ -19,7 +19,7 @@ const schema = yup.object().shape({
     .required("El correo electrónico es requerido"),
   phone_number: yup
     .string()
-    .length(8, "El número telefónico debe tener 8 caracteres")
+    .length(9, "El número telefónico debe tener 9 caracteres")
     .required("El número telefónico es requerido"),
   password: yup
     .string()
