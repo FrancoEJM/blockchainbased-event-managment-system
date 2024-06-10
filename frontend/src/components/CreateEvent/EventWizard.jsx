@@ -62,7 +62,7 @@ const EventWizard = () => {
       fecha: stepOneData.fecha,
       idioma: stepOneData.idioma,
       privacidad: stepOneData.privacidad,
-      modalidad: stepOneData.modalidad,
+      modalidad: 1,
       url_evento: stepOneData.url,
       direccion: adressData,
       ...locationData,
@@ -195,7 +195,7 @@ const EventWizard = () => {
               )}
               {index === 3 && (
                 <StepThree
-                  modalidad={stepOneData.modalidad}
+                  modalidad={1}
                   onLocationSelected={(location) => setLocationData(location)}
                   onAdressSelected={(address) => setAddressData(address)}
                   onImageUpload={(image) => setImageData(image)}

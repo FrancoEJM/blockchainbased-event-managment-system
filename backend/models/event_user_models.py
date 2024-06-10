@@ -41,6 +41,11 @@ class EventoInvitados(Base):
     correo_electronico = _sql.Column(_sql.String, primary_key=True)
     inscrito = _sql.Column(_sql.Boolean, default=False)
     fecha_invitacion = _sql.Column(_sql.DateTime, default=_dt.datetime.now(_dt.timezone.utc))
+    genero = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_GENERO.id_genero"), default=0)
+    nombre = _sql.Column(_sql.String, default="")
+    apellido = _sql.Column(_sql.String, default="")
+    fecha_nacimiento = _sql.Column(_sql.DateTime, default=None)
 
     evento = _orm.relationship("Eventos", back_populates="invitado")
     usuario = _orm.relationship("Usuario", back_populates="invitado")
+    generos = _orm.relationship("Genero", back_populates="invitado")

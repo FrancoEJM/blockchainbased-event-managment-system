@@ -39,3 +39,4 @@ class Genero(Base):
     descripcion = _sql.Column(_sql.String)
 
     propietario = _orm.relationship("Usuario", back_populates="generos")
+    invitado = _orm.relationship("EventoInvitados", back_populates="generos")
