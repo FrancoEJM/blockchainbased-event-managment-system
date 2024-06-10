@@ -3,13 +3,12 @@ import { Link } from "react-router-dom";
 import { formatDate, formatTime } from "../../utils/utils";
 function EventsList() {
   const [events, setEvents] = useState([]);
-  const user_id = localStorage.id_usuario
+  const user_id = localStorage.id_usuario;
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/api/events?id=${user_id}`
-
         );
         if (!response.ok) {
           throw new Error("Error al obtener los eventos");
@@ -58,10 +57,13 @@ function EventsList() {
                 id="text"
                 className="block mb-4 font-sans text-base antialiased font-normal leading-relaxed text-gray-700"
               >
-                {evento.descripcion.length < 170
+                {evento.descripcion && evento.descripcion.length < 170
                   ? evento.descripcion
-                  : evento.descripcion.slice(0, 170) + "..."}
+                  : evento.descripcion
+                  ? evento.descripcion.slice(0, 170) + "..."
+                  : "Sin descripción"}
               </p>
+
               <div className="grid grid-cols-4 gap-4">
                 <div className="col-span-3">
                   <div className="grid grid-rows-4 gap-2">

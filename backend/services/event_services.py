@@ -1,6 +1,7 @@
 import fastapi as _fastapi
 import fastapi.security as _security
 import sqlalchemy.orm as _orm
+import sqlalchemy as _sqlalchemy
 import passlib.hash as _hash
 import datetime as _dt
 import typing as _typing
@@ -243,3 +244,34 @@ async def save_qr_database(path: str, event_id: int, db: _orm.Session):
         db.rollback()
         print(f"Error al guardar QR en la base de datos: {str(e)}")
         raise _fastapi.HTTPException(status_code=404, detail="El evento especificado no existe para guardar el QR")
+
+
+
+def get_event_stats(event_id: int, db: _orm.Session):
+    numero_registros = db.query(_sqlalchemy.func.count(event_user_md.EventoUsuario.id_entrada)).filter(event_user_md.EventoUsuario.id_evento == event_id).scalar()
+
+    detalles = db.query(
+        user_md.Genero.id_genero,
+        user_md.Genero.descripcion.label('genero'),
+        event_user_md.EventoUsuario.fecha_nacimiento,
+        event_user_md.EventoUsuario.invitado
+    ).join(
+        user_md.Genero, event_user_md.EventoUsuario.genero == user_md.Genero.id_genero
+    ).filter(
+        event_user_md.EventoUsuario.id_evento == event_id
+    ).all()
+
+    resultados = {
+        'numero_registros': numero_registros,
+        'detalles': [
+            {
+                'id_genero': detalle.id_genero,
+                'genero': detalle.genero,
+                'fecha_nacimiento': detalle.fecha_nacimiento,
+                'invitado': detalle.invitado
+            }
+            for detalle in detalles
+        ]
+    }
+
+    return resultados

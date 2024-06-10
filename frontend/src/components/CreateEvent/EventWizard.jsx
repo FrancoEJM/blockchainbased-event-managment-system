@@ -4,8 +4,10 @@ import axios from "axios";
 import StepOne from "./StepOne";
 import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
+import { useNavigate } from "react-router-dom";
 
 const EventWizard = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [eventData, setEventData] = useState(null);
   const [stepOneData, setStepOneData] = useState({
@@ -124,6 +126,7 @@ const EventWizard = () => {
           }
         }
       }
+      navigate("/events");
     } catch (error) {
       console.error("Error al crear el evento:", error);
     }

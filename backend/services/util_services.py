@@ -17,7 +17,8 @@ async def send_invitation_email(receiver: str, event_name:str, url_redirect:str)
         "destinatario": receiver,
         "asunto": "Prueba",
         "cuerpo": f'<h1>Correo HTML {event_name}</h1><p>Este es un correo HTML de ejemplo. {url_redirect}</p><img src="{IMG_SRC}" alt="un qr" />',
-        "es_html": True
+        "es_html": True,
+        "ruta_imagen": ""
     }
 
     try:

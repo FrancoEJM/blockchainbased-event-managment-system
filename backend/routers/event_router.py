@@ -94,9 +94,9 @@ async def upload_guests_list(event_id: int,q: _typing.List[str] = _fastapi.Query
     
     for i in range(len(q)):
         correo = await util_sv.send_invitation_email(q[i], event_name, url_redirect)
-        smtp_responses.append({"status": correo["mensaje"]})
+        #smtp_responses.append({"status": correo["mensaje"]})
 
-    return {"db": db_responses, "smtp": smtp_responses} 
+    return {"db": db_responses} 
 
 @router.post("/api/event/mail")
 async def send_emails_to_guest():
@@ -162,6 +162,13 @@ async def delete_event(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.
         return {"message": f"El evento {event_id} ha sido eliminado."}
     except Exception as e:
         raise _fastapi.HTTPException(status_code=500, detail=f"Failed to delete event: {str(e)}")
+
+
+@router.get("/api/event/stats")
+async def get_event_stats(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
+    event_stats = event_sv.get_event_stats(event_id, db)
+    return event_stats
+
 
 @router.post("/api/create-qr-code")
 async def create_public_qr_code(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get_db)):

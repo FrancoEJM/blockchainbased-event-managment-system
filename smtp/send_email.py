@@ -2,13 +2,9 @@ import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
-from dotenv import load_dotenv
+from email.mime.image import MIMEImage
 
-load_dotenv()
-
-def enviar_correo(destinatario, asunto, cuerpo, es_html=False, archivo_adjunto=None):
+def enviar_correo(destinatario, asunto, cuerpo, ruta_imagen=None, es_html=True):
     servidor = os.getenv('SMTP_SERVER')
     puerto = os.getenv('SMTP_PORT')
     usuario = os.getenv('EMAIL_USER')
@@ -23,14 +19,12 @@ def enviar_correo(destinatario, asunto, cuerpo, es_html=False, archivo_adjunto=N
         mensaje.attach(MIMEText(cuerpo, 'html'))
     else:
         mensaje.attach(MIMEText(cuerpo, 'plain'))
-
-    if archivo_adjunto:
-        # Adjunta el archivo
-        adjunto = MIMEBase('application', 'octet-stream')
-        adjunto.set_payload(open(archivo_adjunto, 'rb').read())
-        encoders.encode_base64(adjunto)
-        adjunto.add_header('Content-Disposition', f'attachment; filename={os.path.basename(archivo_adjunto)}')
-        mensaje.attach(adjunto)
+    ruta_imagen = '../backend/data/userPrivateQRImages/image.png'
+    if ruta_imagen:
+        with open(ruta_imagen, 'rb') as img:
+            imagen = MIMEImage(img.read())
+            imagen.add_header('Content-Disposition', f'attachment; filename="{os.path.basename(ruta_imagen)}"')
+            mensaje.attach(imagen)
 
     # Conecta al servidor SMTP
     servidor_smtp = smtplib.SMTP(servidor, puerto)

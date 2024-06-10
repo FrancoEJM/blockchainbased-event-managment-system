@@ -9,6 +9,7 @@ import EndEvent from "../icons/EndEvent";
 import StartEventButton from "./StartEventButton";
 import QrCodeButton from "./QrCodeButton";
 import EndEventButton from "./EndEventButton";
+import StatsButton from "./StatsButton";
 
 const MyEventsList = ({ user_id }) => {
   const [events, setEvents] = useState(null);
@@ -122,9 +123,11 @@ const MyEventsList = ({ user_id }) => {
                 id="text"
                 className="block mb-4 font-sans text-base antialiased font-normal leading-relaxed text-gray-700"
               >
-                {evento.descripcion.length < 170
+                {evento.descripcion && evento.descripcion.length < 170
                   ? evento.descripcion
-                  : evento.descripcion.slice(0, 170) + "..."}
+                  : evento.descripcion
+                  ? evento.descripcion.slice(0, 170) + "..."
+                  : "Sin descripción"}
               </p>
               <div className="grid grid-cols-4 gap-4">
                 <div className="col-span-2">
@@ -202,33 +205,7 @@ const MyEventsList = ({ user_id }) => {
                       </>
                     )}
                   {evento.fecha_finalizacion != null && (
-                    <button
-                      className="p-4 ml-4 bg-red-100 rounded-full"
-                      title="Ver estadísticas"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="icon icon-tabler icon-tabler-device-desktop-analytics"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="#2c3e50"
-                        fill="none"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M3 4m0 1a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1z" />
-                        <path d="M7 20h10" />
-                        <path d="M9 16v4" />
-                        <path d="M15 16v4" />
-                        <path d="M9 12v-4" />
-                        <path d="M12 12v-1" />
-                        <path d="M15 12v-2" />
-                        <path d="M12 12v-1" />
-                      </svg>
-                    </button>
+                    <StatsButton event_id={evento.id_evento} />
                   )}
                 </div>
               </div>
