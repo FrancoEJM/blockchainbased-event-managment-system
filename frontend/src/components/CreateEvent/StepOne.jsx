@@ -1,10 +1,10 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
+import StepOneGuests from "./StepOneGuests";
 
 function StepOne({ modalidad, idioma, privacidad, onUpdate }) {
   const [invitados, setInvitados] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const [modalidadAct, setModalidad] = useState("");
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -47,6 +47,14 @@ function StepOne({ modalidad, idioma, privacidad, onUpdate }) {
 
   const sortOptionsById = (options) => {
     return options.sort((a, b) => a.id_idioma - b.id_idioma);
+  };
+
+  const handleInvitadosUpdate = (newInvitados) => {
+    setInvitados(newInvitados);
+    onUpdate((prevData) => ({
+      ...prevData,
+      lista: newInvitados,
+    }));
   };
 
   return (
@@ -179,40 +187,10 @@ function StepOne({ modalidad, idioma, privacidad, onUpdate }) {
             ))}
           </select>
         </div>
-        <div className="col-span-2">
-          <label
-            className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
-            htmlFor="modalidad"
-          >
-            Modalidad
-          </label>
-          <select
-            className=" block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3"
-            id="modalidad"
-            name="modalidad"
-            type="text"
-            placeholder="Ingrese una descripción para su evento"
-            onChange={(e) => {
-              handleChange(e);
-              setModalidad(e.target.value);
-            }}
-          >
-            <option value="">Seleccione una opción</option>
-            {modalidad.map((option) => (
-              <option key={option.id_modalidad} value={option.id_modalidad}>
-                {option.descripcion}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="col-span-2">
-          <label
-            className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
-            htmlFor="lista"
-          >
-            Lista de invitados
-          </label>
-          <input
+        <div className="col-span-2"></div>
+        <StepOneGuests onUpdate={handleInvitadosUpdate} />
+
+        {/* <input
             className=" block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3"
             id="lista"
             type="text"
@@ -220,56 +198,7 @@ function StepOne({ modalidad, idioma, privacidad, onUpdate }) {
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleInputKeyPress}
-          />
-        </div>
-        <div className="col-span-2">
-          <div className="overflow-y-auto h-16 mb-2">
-            {invitados.map((invitado, index) => (
-              <div
-                key={index}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  borderBottom: "1px solid #ccc",
-                  padding: "5px",
-                }}
-              >
-                <span>{invitado}</span>
-                <button
-                  onClick={() => handleRemoveInvitado(index)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
-                >
-                  X
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="col-span-2">
-          {modalidadAct === "2" && (
-            <div>
-              <label
-                className="block tracking-wide text-grey-darker text-xs font-bold mb-2"
-                htmlFor="url"
-              >
-                URL
-              </label>
-              <input
-                className=" block w-full bg-grey-lighter text-grey-darker border border-red rounded py-3 px-4 mb-3"
-                id="url"
-                name="url"
-                type="text"
-                placeholder="Ingrese la URL del evento"
-                onChange={handleChange}
-              />
-            </div>
-          )}
-        </div>
+          /> */}
       </div>
     </form>
   );

@@ -115,23 +115,27 @@ async def save_event_image_default(id, db:_orm.Session):
     return image_obj
 
 
-async def save_event_guest(id, email, db:_orm.Session):
+async def save_event_guest(id: int, name:str, email:str, gender, birthdate, db:_orm.Session):
     existing_user = db.query(user_md.Usuario).filter(user_md.Usuario.correo_electronico == email).first()
     
     if existing_user:
         id_usuario = existing_user.id_usuario
     else:
         id_usuario = 0
-    
+
     guest_obj = event_user_md.EventoInvitados(
         id_evento = id,
         id_usuario = id_usuario,
         correo_electronico = email,
+        nombre = name,
+        genero = gender,
+        fecha_nacimiento = birthdate
     )
+    
     db.add(guest_obj)
     db.commit()
     db.refresh(guest_obj)
-    return id_usuario
+    return guest_obj
 
 
 async def get_events(user_id: int, db: _orm.Session):
@@ -275,3 +279,33 @@ def get_event_stats(event_id: int, db: _orm.Session):
     }
 
     return resultados
+
+
+async def parse_guests_data(event_id: int, guests: _typing.List[_typing.Dict[str, _typing.Any]], db):
+    db_responses = []
+    for guest_data in guests:
+        name = guest_data['nombre']
+        email = guest_data['correo_electronico']
+        gender = guest_data['genero']
+        birthdate = guest_data['fecha_nacimiento']
+        gender_mapping = {
+            'M': 1,
+            'F': 2,
+            'O': 3,
+            'D': 0
+        }
+
+        if gender in gender_mapping:
+            gender = gender_mapping[gender]
+
+        try:
+            guest_obj = await save_event_guest(event_id, name, email, gender, birthdate, db)
+            db_responses.append({
+                "correo_electronico": guest_obj.correo_electronico,
+                "fecha_invitacion": guest_obj.fecha_invitacion,
+                "nombre": guest_obj.nombre,
+                "genero": guest_obj.genero,
+            })
+        except Exception as e:
+            print(f"Error saving guest {name}: {str(e)}")
+    return db_responses

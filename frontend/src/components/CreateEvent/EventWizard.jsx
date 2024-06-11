@@ -113,20 +113,19 @@ const EventWizard = () => {
         }
         if (stepOneData.lista && stepOneData.lista.length > 0) {
           try {
-            const queryParams = stepOneData.lista
-              .map((email) => `q=${encodeURIComponent(email)}`)
-              .join("&");
+            console.log("enviando invitados:", stepOneData.lista);
             const url = `${
               import.meta.env.VITE_BACKEND_URL
-            }/api/event/guests?event_id=${id_evento}&${queryParams}`;
-            const response = await axios.post(url);
+            }/api/event/guests?event_id=${id_evento}`;
+
+            const response = await axios.post(url, stepOneData.lista);
             console.log("Respuesta del servidor:", response.data);
           } catch (error) {
             console.error("Error al ingresar los invitados:", error);
           }
         }
       }
-      navigate("/events");
+      //navigate("/events");
     } catch (error) {
       console.error("Error al crear el evento:", error);
     }

@@ -15,6 +15,6 @@ class Correo(BaseModel):
 def enviar_correo_endpoint(correo: Correo):
     try:
         enviar_correo(correo.destinatario, correo.asunto, correo.cuerpo, correo.es_html, correo.ruta_imagen)
-        return {"mensaje": "Correo enviado con éxito"}
+        return {"correo": "Correo enviado con éxito"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
