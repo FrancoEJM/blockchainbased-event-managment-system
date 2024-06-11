@@ -1,7 +1,5 @@
 import sqlalchemy as _sql
 import sqlalchemy.orm as _orm
-from models import event_models, event_user_models, user_models
-from base import Base
 
 DB_URL = "postgresql://fjm:123@localhost:5432/db_project"
 

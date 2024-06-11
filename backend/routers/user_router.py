@@ -1,22 +1,24 @@
 import fastapi as _fastapi
-import fastapi.security as _security
-
 import sqlalchemy.orm as _orm
-import datetime as _dt
-import services as _services, schemas as _schemas
 
 from schemas import user_schemas as user_sch
 from services import database_services as db_sv, user_services as user_sv
+
 router = _fastapi.APIRouter()
 
+
 @router.post("/api/users")
-async def create_user(user: user_sch.UserCreate,
-                      db:_orm.Session = _fastapi.Depends(db_sv.get_db)):
+async def create_user(
+    user: user_sch.UserCreate, db: _orm.Session = _fastapi.Depends(db_sv.get_db)
+):
     db_user = await user_sv.get_user_by_email(user.correo_electronico, db)
     if db_user:
-        raise _fastapi.HTTPException(status_code=_fastapi.status.HTTP_400_BAD_REQUEST,
-                                     detail="El correo electrónico está en uso")
+        raise _fastapi.HTTPException(
+            status_code=_fastapi.status.HTTP_400_BAD_REQUEST,
+            detail="El correo electrónico está en uso",
+        )
     return await user_sv.create_user(user, db)
+
 
 @router.get("/api/users/me", response_model=user_sch.User)
 async def get_user(user: user_sch.User = _fastapi.Depends(user_sv.get_current_user)):
@@ -24,5 +26,9 @@ async def get_user(user: user_sch.User = _fastapi.Depends(user_sv.get_current_us
 
 
 @router.post("/api/user/unregistered_details")
-async def save_attendee_data(details: user_sch.AttendeeDetails, db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
-    return await user_sv.save_attendee_data(details.event_id, details.gender, details.fullname, details.birthdate, db)
+async def save_attendee_data(
+    details: user_sch.AttendeeDetails, db: _orm.Session = _fastapi.Depends(db_sv.get_db)
+):
+    return await user_sv.save_attendee_data(
+        details.event_id, details.gender, details.fullname, details.birthdate, db
+    )

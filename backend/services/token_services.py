@@ -11,6 +11,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 OAuth2Schema = _security.OAuth2PasswordBearer(tokenUrl="/api/token")
 
+
 async def create_token(user: user_md.Usuario):
     user_obj = user_sch.User.model_validate(user)
     token = _jwt.encode(user_obj.model_dump(), SECRET_KEY)

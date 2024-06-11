@@ -2,8 +2,10 @@ import datetime as _dt
 
 import pydantic as _pydantic
 
+
 class _EventBase(_pydantic.BaseModel):
     id_creador: int
+
 
 class EventCreate(_EventBase):
     nombre: str
@@ -18,6 +20,7 @@ class EventCreate(_EventBase):
     direccion: str
     latitud: float
     longitud: float
+
 
 class ImageUpload(_pydantic.BaseModel):
     id_evento: int

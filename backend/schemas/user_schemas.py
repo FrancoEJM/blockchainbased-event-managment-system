@@ -2,8 +2,10 @@ import datetime as _dt
 
 import pydantic as _pydantic
 
+
 class _UserBase(_pydantic.BaseModel):
     correo_electronico: str
+
 
 class UserCreate(_UserBase):
     hash_contrasena: str
@@ -15,11 +17,13 @@ class UserCreate(_UserBase):
     class Config:
         from_attributes = True
 
+
 class User(_UserBase):
-    id_usuario:int
+    id_usuario: int
 
     class Config:
         from_attributes = True
+
 
 class AttendeeDetails(_pydantic.BaseModel):
     event_id: int

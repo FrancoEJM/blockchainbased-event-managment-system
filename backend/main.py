@@ -1,9 +1,6 @@
 import fastapi as _fastapi
-import fastapi.security as _security
 import fastapi.middleware.cors as _CORS
 import fastapi.staticfiles as _staticfiles
-
-import sqlalchemy.orm as _orm
 
 from routers.user_router import router as user_router
 from routers.token_router import router as token_router
@@ -11,12 +8,8 @@ from routers.event_router import router as event_router
 from routers.event_user_router import router as eu_router
 from routers.util_router import router as util_router
 
-from typing import List
-
 app = _fastapi.FastAPI()
-origins = [
-   "http://localhost:5173" 
-]
+origins = ["http://localhost:5173"]
 
 app.add_middleware(
     _CORS.CORSMiddleware,
