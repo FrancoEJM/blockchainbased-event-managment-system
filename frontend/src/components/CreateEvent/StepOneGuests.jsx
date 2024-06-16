@@ -27,7 +27,7 @@ function StepOneGuests({ onUpdate }) {
               : "D";
           let fecha_nacimiento = isValidDate(row[3])
             ? formatDate(row[3])
-            : "01/01/1900"; // Fallback date
+            : "01/01/1900";
 
           return { nombre, correo_electronico, genero, fecha_nacimiento };
         });

@@ -4,7 +4,11 @@ import sqlalchemy.orm as _orm
 import passlib.hash as _hash
 import datetime as _dt
 from schemas import user_schemas as user_sch
-from models import user_models as user_md, event_user_models as event_user_md
+from models import (
+    user_models as user_md,
+    event_user_models as event_user_md,
+    event_models as event_md,
+)
 from services import database_services as db_sv
 import dotenv
 import os
@@ -86,3 +90,23 @@ async def save_attendee_data(
     db.commit()
     db.refresh(attendee_data_obj)
     return attendee_data_obj
+
+
+async def is_invited(event_id: int, email: str, token: str, db: _orm.Session):
+    invitation = (
+        db.query(event_md.EventosQRPrivados)
+        .filter_by(
+            correo_electronico=email,
+            id_evento=event_id,
+            token=token,
+            token_utilizado=False,
+        )
+        .first()
+    )
+    if invitation:
+        invitation.token_utilizado = True
+        db.add(invitation)
+        db.commit()
+        db.refresh(invitation)
+
+    return invitation

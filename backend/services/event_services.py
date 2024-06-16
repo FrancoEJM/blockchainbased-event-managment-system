@@ -9,6 +9,7 @@ from models import (
     event_models as event_md,
     event_user_models as event_user_md,
 )
+from services import token_services as token_sv, qr_services as qr_sv
 
 
 async def get_user_by_email(email: str, db: _orm.Session):
@@ -302,7 +303,7 @@ def get_event_stats(event_id: int, db: _orm.Session):
     return resultados
 
 
-async def parse_guests_data(
+async def save_guests_data(
     event_id: int, guests: _typing.List[_typing.Dict[str, _typing.Any]], db
 ):
     db_responses = []
@@ -316,18 +317,17 @@ async def parse_guests_data(
         if gender in gender_mapping:
             gender = gender_mapping[gender]
 
-        try:
-            guest_obj = await save_event_guest(
-                event_id, name, email, gender, birthdate, db
-            )
-            db_responses.append(
-                {
-                    "correo_electronico": guest_obj.correo_electronico,
-                    "fecha_invitacion": guest_obj.fecha_invitacion,
-                    "nombre": guest_obj.nombre,
-                    "genero": guest_obj.genero,
-                }
-            )
-        except Exception as e:
-            print(f"Error saving guest {name}: {str(e)}")
+        token = await token_sv.generate_unique_token(db)
+
+        guest_obj = await save_event_guest(event_id, name, email, gender, birthdate, db)
+        db_responses.append(
+            {
+                "correo_electronico": guest_obj.correo_electronico,
+                "fecha_invitacion": guest_obj.fecha_invitacion,
+                "nombre": guest_obj.nombre,
+                "genero": guest_obj.genero,
+            }
+        )
+        await qr_sv.generate_user_qr(event_id, email, token, db)
+
     return db_responses

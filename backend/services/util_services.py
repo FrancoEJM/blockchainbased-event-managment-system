@@ -17,7 +17,7 @@ async def get_gender(db: _orm.Session):
 async def send_invitation_email(
     event_id: str, guests: _typing.List[_typing.Dict[str, _typing.Any]], db
 ):
-    smtp_responses = []
+    smtp_responses = 0
     event = await event_sv.get_event(event_id, db)
     event_name = event.nombre
     url = f"{SMTP_URL}/enviar-correo/"
@@ -31,16 +31,16 @@ async def send_invitation_email(
             "ruta_imagen": "",
         }
 
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=correo_data)
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json=correo_data)
 
-        response.raise_for_status()
-        smtp_responses.append(response.json())
+            response.raise_for_status()
+            smtp_responses += 1
 
-    except httpx.HTTPStatusError as e:
-        print(f"HTTP error occurred: {e}")
-    except httpx.RequestError as e:
-        print(f"Request error occurred: {e}")
+        except httpx.HTTPStatusError as e:
+            print(f"HTTP error occurred: {e}")
+        except httpx.RequestError as e:
+            print(f"Request error occurred: {e}")
 
     return smtp_responses

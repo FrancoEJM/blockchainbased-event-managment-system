@@ -102,9 +102,12 @@ async def upload_guests_list(
     guests: _typing.List[_typing.Dict[str, _typing.Any]],
     db: _orm.Session = _fastapi.Depends(db_sv.get_db),
 ):
-    db_responses = await event_sv.parse_guests_data(event_id, guests, db)
+    db_responses = await event_sv.save_guests_data(event_id, guests, db)
     smtp_responses = await util_sv.send_invitation_email(event_id, guests, db)
-    return {"db": db_responses, "smtp": smtp_responses}
+    return {
+        "db": db_responses,
+        "smtp": f"Se han enviado {smtp_responses} correos exitosamente",
+    }
 
 
 @router.post("/api/event/start")
@@ -116,7 +119,7 @@ async def start_event(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.g
             qr_data = await create_public_qr_code(event_id, db)
             return execution_date, qr_data["qr_image_path"]
         elif execution_date and event_features.privacidad == 2:
-            return {"es": "privado"}
+            return execution_date
         else:
             raise _fastapi.HTTPException(
                 status_code=404, detail=f"Event with id {event_id} not found"

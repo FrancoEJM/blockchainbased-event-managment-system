@@ -58,6 +58,7 @@ class EventosDefinicion(Base):
     imagenes = _orm.relationship("EventosImagenes", back_populates="imagen")
 
     qrs_publicos = _orm.relationship("EventosQRPublicos", back_populates="qr_publico")
+    qrs_privados = _orm.relationship("EventosQRPrivados", back_populates="qr_privado")
 
     parametros = _orm.relationship("EventosParametros", back_populates="parametro")
 
@@ -111,6 +112,18 @@ class EventosQRPublicos(Base):
     path = _sql.Column(_sql.String)
 
     qr_publico = _orm.relationship("EventosDefinicion", back_populates="qrs_publicos")
+
+
+class EventosQRPrivados(Base):
+    __tablename__ = "BLC_QR_PRIVADO"
+    id_qr = _sql.Column(_sql.Integer, primary_key=True, index=True)
+    id_evento = _sql.Column(_sql.Integer, _sql.ForeignKey("BLC_EVENTOS.id_evento"))
+    correo_electronico = _sql.Column(_sql.String)
+    path = _sql.Column(_sql.String)
+    token = _sql.Column(_sql.String)
+    token_utilizado = _sql.Column(_sql.Boolean, default=0)
+
+    qr_privado = _orm.relationship("EventosDefinicion", back_populates="qrs_privados")
 
 
 class EventosParametros(Base):

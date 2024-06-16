@@ -2,8 +2,9 @@ import fastapi.security as _security
 import jwt as _jwt
 import dotenv
 import os
-
-from models import user_models as user_md
+import secrets
+import sqlalchemy.orm as _orm
+from models import user_models as user_md, event_models as event_md
 from schemas import user_schemas as user_sch
 
 dotenv.load_dotenv()
@@ -17,3 +18,10 @@ async def create_token(user: user_md.Usuario):
     token = _jwt.encode(user_obj.model_dump(), SECRET_KEY)
 
     return dict(access_token=token, token_type="bearer")
+
+
+async def generate_unique_token(db: _orm.Session, length=16):
+    while True:
+        token = secrets.token_hex(length // 2)
+        if not db.query(event_md.EventosQRPrivados).filter_by(token=token).first():
+            return token

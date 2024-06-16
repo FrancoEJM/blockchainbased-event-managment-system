@@ -10,6 +10,7 @@ import StartEventButton from "./StartEventButton";
 import QrCodeButton from "./QrCodeButton";
 import EndEventButton from "./EndEventButton";
 import StatsButton from "./StatsButton";
+import QrReaderButton from "./QrReaderButton";
 
 const MyEventsList = ({ user_id }) => {
   const [events, setEvents] = useState(null);
@@ -59,24 +60,44 @@ const MyEventsList = ({ user_id }) => {
     setQrUrl(url);
   };
 
-  const handleStartEvent = async (event_id, execution_date, array_qr_data) => {
-    setEvents((prevEvents) =>
-      prevEvents.map((evento) =>
-        evento.id_evento === event_id
-          ? {
-              ...evento,
-              fecha_ejecucion: execution_date,
-              qrs_publicos: array_qr_data,
-            }
-          : evento
-      )
-    );
+  const handleStartEvent = async (
+    event_id,
+    execution_date,
+    privacidad,
+    array_qr_data = null
+  ) => {
+    if (privacidad == 1) {
+      setEvents((prevEvents) =>
+        prevEvents.map((evento) =>
+          evento.id_evento == event_id
+            ? {
+                ...evento,
+                fecha_ejecucion: execution_date,
+                qrs_publicos: array_qr_data,
+              }
+            : evento
+        )
+      );
+    }
+
+    if (privacidad == 2) {
+      setEvents((prevEvents) =>
+        prevEvents.map((evento) =>
+          evento.id_evento == event_id
+            ? {
+                ...evento,
+                fecha_ejecucion: execution_date,
+              }
+            : evento
+        )
+      );
+    }
   };
 
   const handleEndEvent = async (event_id, end_date) => {
     setEvents((prevEvents) =>
       prevEvents.map((evento) =>
-        evento.id_evento === event_id
+        evento.id_evento == event_id
           ? {
               ...evento,
               fecha_finalizacion: end_date,
@@ -191,22 +212,31 @@ const MyEventsList = ({ user_id }) => {
                       onStartEventSuccess={handleStartEventSuccess}
                     />
                   )}
-                  {evento.fecha_ejecucion != null &&
-                    evento.fecha_finalizacion == null && (
-                      <>
-                        <QrCodeButton
-                          events={events}
-                          event_id={evento.id_evento}
-                        />
-                        <EndEventButton
-                          event_id={evento.id_evento}
-                          onEndEvent={handleEndEvent}
-                        />
-                      </>
+                  <>
+                    {evento.fecha_ejecucion != null &&
+                      evento.fecha_finalizacion == null && (
+                        <>
+                          {evento.privacidad == 1 ? (
+                            <QrCodeButton
+                              events={events}
+                              event_id={evento.id_evento}
+                            />
+                          ) : (
+                            <QrReaderButton
+                              events={events}
+                              event_id={evento.id_evento}
+                            />
+                          )}
+                          <EndEventButton
+                            event_id={evento.id_evento}
+                            onEndEvent={handleEndEvent}
+                          />
+                        </>
+                      )}
+                    {evento.fecha_finalizacion != null && (
+                      <StatsButton event_id={evento.id_evento} />
                     )}
-                  {evento.fecha_finalizacion != null && (
-                    <StatsButton event_id={evento.id_evento} />
-                  )}
+                  </>
                 </div>
               </div>
             </div>
