@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
-import { EventStats, Events } from "./pages/Events";
+import { EventGeneralStats, EventStats, Events } from "./pages/Events";
 import { Event } from "./pages/Events";
 import { MyEvents } from "./pages/Events";
 import { CreateEvent } from "./pages/CreateEvent";
@@ -26,6 +26,7 @@ function App() {
           <Route path="/new-event" element={<CreateEvent />} />
           <Route path="/me" element={<Profile />} />
           <Route path="/data/:event_id" element={<DataCollection />} />
+          <Route path="/general-stats" element={<EventGeneralStats />} />
           <Route path="/stats/:event_id" element={<EventStats />} />
           <Route path="*" element={<h1>Not Found</h1>} />
         </Routes>

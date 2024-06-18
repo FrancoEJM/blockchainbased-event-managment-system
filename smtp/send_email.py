@@ -4,26 +4,32 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 
-def enviar_correo(destinatario, asunto, cuerpo, ruta_imagen=None, es_html=True):
-    servidor = os.getenv('SMTP_SERVER')
-    puerto = os.getenv('SMTP_PORT')
-    usuario = os.getenv('EMAIL_USER')
-    contraseña = os.getenv('EMAIL_PASSWORD')
+
+def enviar_correo(destinatario, asunto, cuerpo, es_html, ruta_imagen: str):
+    servidor = os.getenv("SMTP_SERVER")
+    puerto = os.getenv("SMTP_PORT")
+    usuario = os.getenv("EMAIL_USER")
+    contraseña = os.getenv("EMAIL_PASSWORD")
 
     mensaje = MIMEMultipart()
-    mensaje['From'] = usuario
-    mensaje['To'] = destinatario
-    mensaje['Subject'] = asunto
+    mensaje["From"] = usuario
+    mensaje["To"] = destinatario
+    mensaje["Subject"] = asunto
 
     if es_html:
-        mensaje.attach(MIMEText(cuerpo, 'html'))
+        mensaje.attach(MIMEText(cuerpo, "html"))
     else:
-        mensaje.attach(MIMEText(cuerpo, 'plain'))
-    ruta_imagen = '../backend/data/userPrivateQRImages/image.png'
+        mensaje.attach(MIMEText(cuerpo, "plain"))
+    # ruta_imagen = "../backend/data/userPrivateQRImages/image.png"
+
+    print("ruta_imagen", ruta_imagen)
     if ruta_imagen:
-        with open(ruta_imagen, 'rb') as img:
+        with open(ruta_imagen, "rb") as img:
             imagen = MIMEImage(img.read())
-            imagen.add_header('Content-Disposition', f'attachment; filename="{os.path.basename(ruta_imagen)}"')
+            imagen.add_header(
+                "Content-Disposition",
+                f'attachment; filename="{os.path.basename(ruta_imagen)}"',
+            )
             mensaje.attach(imagen)
 
     # Conecta al servidor SMTP

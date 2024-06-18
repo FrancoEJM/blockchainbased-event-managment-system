@@ -9,7 +9,7 @@ from models import (
     event_user_models as event_user_md,
     event_models as event_md,
 )
-from services import database_services as db_sv
+from services import database_services as db_sv, util_services as util_sv
 import dotenv
 import os
 import jwt as _jwt
@@ -110,3 +110,42 @@ async def is_invited(event_id: int, email: str, token: str, db: _orm.Session):
         db.refresh(invitation)
 
     return invitation
+
+
+async def get_user_stats(user_id: int, db: _orm.Session):
+    # Obtener todos los eventos creados por el usuario
+    eventos = db.query(event_md.Eventos).filter_by(usuario_creador=user_id).all()
+
+    # Lista para almacenar las estadísticas de los asistentes
+    asistentes_stats = []
+
+    for evento in eventos:
+        # Obtener todos los registros de los asistentes a este evento
+        asistentes = (
+            db.query(event_user_md.EventoUsuario, event_md.EventosDefinicion.nombre)
+            .join(
+                event_md.EventosDefinicion,
+                event_user_md.EventoUsuario.id_evento
+                == event_md.EventosDefinicion.id_evento,
+            )
+            .filter(event_user_md.EventoUsuario.id_evento == evento.id_evento)
+            .all()
+        )
+
+        for asistente, nombre_evento in asistentes:
+            id_evento = asistente.id_evento
+            genero = asistente.genero
+            edad = util_sv.calculate_age(asistente.fecha_nacimiento)
+            invitado = asistente.invitado
+
+            asistentes_stats.append(
+                {
+                    "id_evento": id_evento,
+                    "nombre_evento": nombre_evento,
+                    "genero": genero,
+                    "edad": edad,
+                    "invitado": invitado,
+                }
+            )
+
+    return asistentes_stats

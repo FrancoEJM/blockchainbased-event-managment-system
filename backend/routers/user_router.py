@@ -3,7 +3,11 @@ import fastapi.responses as _responses
 import sqlalchemy.orm as _orm
 
 from schemas import user_schemas as user_sch
-from services import database_services as db_sv, user_services as user_sv
+from services import (
+    database_services as db_sv,
+    user_services as user_sv,
+    event_user_services as event_user_sv,
+)
 
 router = _fastapi.APIRouter()
 
@@ -44,8 +48,22 @@ async def validate_user_by_qr(
 ):
     invitation = await user_sv.is_invited(event_id, email, token, db)
     if invitation:
+        gender, birthdate, name = await event_user_sv.get_invitation_data(
+            event_id, email, db
+        )
+        await event_user_sv.register_user_in_event(
+            event_id, email, db, gender, birthdate, name
+        )
         return invitation
     raise _fastapi.HTTPException(
         status_code=_fastapi.status.HTTP_401_UNAUTHORIZED,
         detail="El usuario no ha sido invitado o ya ha ingresado al evento",
     )
+
+
+@router.get("/api/user/stats")
+async def get_user_stats(
+    user_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get_db)
+):
+    stats = await user_sv.get_user_stats(user_id, db)
+    return stats

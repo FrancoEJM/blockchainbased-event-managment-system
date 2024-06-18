@@ -4,6 +4,7 @@ from models import user_models as user_md
 import os
 from services import event_services as event_sv
 import typing as _typing
+import datetime as _dt
 
 SMTP_URL = os.getenv("SMTP_URL")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
@@ -23,12 +24,13 @@ async def send_invitation_email(
     url = f"{SMTP_URL}/enviar-correo/"
 
     for guest in guests:
+        destinatario = guest["correo_electronico"]
         correo_data = {
-            "destinatario": guest["correo_electronico"],
-            "asunto": "Prueba",
-            "cuerpo": f'<h1>Correo HTML {event_name}</h1><p>Este es un correo HTML de ejemplo. {url}</p><img src="{IMG_SRC}" alt="un qr" />',
+            "destinatario": destinatario,
+            "asunto": f"Invitación: {event_name}",
+            "cuerpo": f"<h1>Felicidades, has sido invitado a {event_name}</h1><br><p>Por favor, guarda el siguiente código QR, el cual será solicitado en puerta para poder acceder al evento.</p>",
             "es_html": True,
-            "ruta_imagen": "",
+            "ruta_imagen": f'../backend/data/userPrivateQRImages/{event_id}_{destinatario.split('@')[0]}.png',
         }
 
         try:
@@ -44,3 +46,30 @@ async def send_invitation_email(
             print(f"Request error occurred: {e}")
 
     return smtp_responses
+
+
+def calculate_age(birthdate):
+    if birthdate:
+        try:
+            if isinstance(birthdate, _dt.datetime):
+                birthdate = (
+                    birthdate.date()
+                )  # Convertir a datetime.date si es datetime.datetime
+            elif isinstance(birthdate, _dt.date):
+                pass  # Si ya es datetime.date, no hacer nada
+            else:
+                return None  # Formato inválido
+
+            today = _dt.date.today()
+            age = (
+                today.year
+                - birthdate.year
+                - ((today.month, today.day) < (birthdate.month, birthdate.day))
+            )
+            return age
+        except ValueError:
+            # Fecha de nacimiento inválida
+            return None
+    else:
+        # Fecha de nacimiento es None o vacía
+        return None
