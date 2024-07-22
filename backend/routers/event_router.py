@@ -8,6 +8,7 @@ from services import (
     database_services as db_sv,
     event_services as event_sv,
     util_services as util_sv,
+    blc_services as blc_sv,
 )
 
 import os
@@ -135,6 +136,8 @@ async def end_event(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get
     try:
         finished_event = await event_sv.end_event(event_id, db)
         if finished_event:
+            user_id = finished_event.usuario_creador
+            BLC_JSON = blc_sv.collect_event_json(event_id, user_id, db)
             return finished_event
         else:
             raise _fastapi.HTTPException(
@@ -144,6 +147,13 @@ async def end_event(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get
         raise _fastapi.HTTPException(
             status_code=500, detail=f"Failed to end event: {str(e)}"
         )
+
+
+@router.get("/test/tx")
+async def test_tx(
+    event_id: int, user_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get_db)
+):
+    return await blc_sv.collect_event_json(event_id, user_id, db)
 
 
 @router.delete("/api/event")

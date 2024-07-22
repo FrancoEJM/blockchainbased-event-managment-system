@@ -27,6 +27,8 @@ class Usuario(Base):
     region = _sql.Column(_sql.String, default="")
     nacionalidad = _sql.Column(_sql.String, default="")
     telefono = _sql.Column(_sql.Integer, default="")
+    llave_publica = _sql.Column(_sql.LargeBinary, default=None)
+    llave_privada = _sql.Column(_sql.LargeBinary, default=None)
 
     generos = _orm.relationship("Genero", back_populates="propietario")
 

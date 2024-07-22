@@ -1,5 +1,4 @@
 import fastapi as _fastapi
-import fastapi.responses as _responses
 import sqlalchemy.orm as _orm
 
 from schemas import user_schemas as user_sch

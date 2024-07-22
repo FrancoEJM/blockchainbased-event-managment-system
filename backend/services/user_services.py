@@ -9,7 +9,11 @@ from models import (
     event_user_models as event_user_md,
     event_models as event_md,
 )
-from services import database_services as db_sv, util_services as util_sv
+from services import (
+    database_services as db_sv,
+    util_services as util_sv,
+    cryptography_services as crypto_sv,
+)
 import dotenv
 import os
 import jwt as _jwt
@@ -44,6 +48,8 @@ async def create_user(user: user_sch.UserCreate, db: _orm.Session):
     db.add(user_obj)
     db.commit()
     db.refresh(user_obj)
+
+    await crypto_sv.create_cryptographic_credentials(user_obj.id_usuario, db)
     return user_obj
 
 

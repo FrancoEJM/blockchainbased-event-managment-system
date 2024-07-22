@@ -1,0 +1,34 @@
+{
+    "organizador": 1,
+    "organizacion": "robleaustral",
+    "llave_publica": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0RfnKypV6dYLXcrLYmSNqYSvvAEHaZ0Wg/qm6QTSUzV2Izc1a6OauRZ7qNlUJIJwvQaJRHTG0ongPq33QRdXmYMpxZse9MjDBrBfI1LccsWLRS4yQkhfSSCIjjYMlFnv4fN/95pJbp0yibKD09DiYFAisOj7od/rCfjZTptxnezOy9izydygqOyacCKfNbCO+JJEeVl2uo06HHry9mvMkwdoxACIW7UIR9mXKXzN+WwjuJtpKuTO1BvHcuFv9Cea50rOtoBkaOnecTRW07fG0zxbH0gi/pkU8NgEvGlK/RrxXzpfBsywvq0ppf037y01ZmEPna/e216y6VvgKUsuEQIDAQAB",
+    "firma_digital": "test",
+    "transacciones": [
+        {
+            "tipo": 1,
+            "detalle": {
+                "fecha_inicio": "2024-06-29T15:30:00Z",
+                "usuario": 1,
+                "nombre_evento": "Evento de prueba",
+                "tipo_evento": 1
+            }
+        },
+        {
+            "tipo": 2,
+            "detalle": {
+                "fecha_ingreso": "2024-06-29T16:00:00Z",
+                "usuario": 2,
+                "validado": 0
+            }
+        },
+        {
+            "tipo": 3,
+            "detalle": {
+                "fecha_cierre": "2024-06-29T18:00:00Z",
+                "usuario": 1,
+                "nombre_evento": "Evento de prueba",
+                "tipo_evento": 1
+            }
+        }
+    ]
+}
