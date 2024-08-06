@@ -13,6 +13,7 @@ async def collect_event_json(event_id: int, user_id: int, db: _orm.Session):
 
     # Crear diccionario inicial con los datos fijos
     json = {
+        "id_evento": event_id,
         "organizador": user_id,
         "organizacion": "robleaustral",
         "llave_publica": public_key,

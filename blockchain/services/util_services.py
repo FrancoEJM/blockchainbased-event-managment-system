@@ -1,5 +1,5 @@
 from typing import List, Dict
-from models import blc_models as blc_md
+from models import blockchain_models as blc_md
 
 
 def convert_nodes(nodes: List[blc_md.NODOS]) -> List[Dict]:

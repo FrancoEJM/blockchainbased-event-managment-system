@@ -13,6 +13,7 @@ class BLOQUES(Base):
     org = _sql.Column(_sql.String)
     creador = _sql.Column(_sql.Integer)
     path = _sql.Column(_sql.String)
+    timestamp = _sql.Column(_sql.Date)
 
 
 class NODOS(Base):

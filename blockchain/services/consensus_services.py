@@ -1,12 +1,13 @@
 import sqlalchemy.orm as _orm
 
 from services import blockchain_services as blc_sv
-from models import blc_models as blc_md
+from models import blockchain_models as blc_md
 
 from typing import List
 import random
 import asyncio
 import httpx
+import aiohttp
 import time
 
 
@@ -59,42 +60,100 @@ def assign_times(nodes, epsilon):
     return result
 
 
-async def send_poet_request(node):
-    assigned_time = node["assigned_time"]
-    ip = node["ip"]
+# async def send_poet_request(node):
+#     assigned_time = node["assigned_time"]
+#     ip = node["ip"]
+#     client_timestamp = time.time()
 
-    async with httpx.AsyncClient() as client:
-        start_time = time.time()
-        response = await client.post(
-            f"http://{ip}/poet-wait", json={"assigned_time": assigned_time}
-        )
-        end_time = time.time()
-        real_waited_time = end_time - start_time
-        response_data = response.json()
-        return {
-            "ip": ip,
-            "assigned_time": assigned_time,
-            "real_waited_time": real_waited_time,
-            "response_data": response_data,
+#     async with httpx.AsyncClient() as client:
+#         start_time = time.time()
+#         response = await client.post(
+#             f"http://{ip}/poet-wait",
+#             json={"assigned_time": assigned_time, "timestamp": client_timestamp},
+#         )
+#         end_time = time.time()
+#         response_data = response.json()
+#         real_waited_time = end_time - start_time
+#         round_trip_time = end_time - client_timestamp
+#         processing_time = (
+#             response_data["server_timestamp"] - client_timestamp - assigned_time
+#         )
+#         return {
+#             "ip": ip,
+#             "assigned_time": assigned_time,
+#             "real_waited_time": real_waited_time,
+#             "round_trip_time": round_trip_time,
+#             "processing_time": processing_time,
+#             "response_data": response_data,
+#         }
+
+
+async def send_poet_request(node):
+    timeout = aiohttp.ClientTimeout(
+        total=20,  # Tiempo total máximo de espera en segundos
+        connect=10,  # Tiempo máximo de conexión en segundos
+        sock_connect=5,  # Tiempo máximo para conectar al socket en segundos
+        sock_read=10,  # Tiempo máximo para leer desde el socket en segundos
+    )
+
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        url = f"http://{node['ip']}/poet-wait"
+        client_timestamp = time.time()
+        payload = {
+            "assigned_time": node["assigned_time"],
+            "timestamp": client_timestamp,
         }
+        try:
+            async with session.post(url, json=payload) as response:
+                response.raise_for_status()  # Lanzar una excepción para códigos de estado HTTP 4xx/5xx
+                response_data = await response.json()
+                server_timestamp = response_data.get("server_timestamp", time.time())
+                # Calculamos los tiempos
+                real_waited_time = server_timestamp - client_timestamp
+                round_trip_time = time.time() - client_timestamp
+                processing_time = (
+                    server_timestamp - client_timestamp - node["assigned_time"]
+                )
+
+                return {
+                    "ip": node["ip"],
+                    "assigned_time": node["assigned_time"],
+                    "real_waited_time": real_waited_time,
+                    "round_trip_time": round_trip_time,
+                    "processing_time": processing_time,
+                    "response_data": response_data,
+                }
+        except Exception as e:
+            # Manejar la excepción y retornar None o un diccionario con un estado de error
+            print(f"Error al contactar al nodo {node['ip']}: {str(e)}")
+            return {
+                "ip": node["ip"],
+                "assigned_time": node["assigned_time"],
+                "real_waited_time": float(
+                    "inf"
+                ),  # Valores altos para asegurar que no sean seleccionados
+                "round_trip_time": float("inf"),
+                "processing_time": float("inf"),
+                "response_data": {"error": str(e)},
+            }
 
 
 async def proof_of_elapsed_time(nodes, epsilon):
-    # Generar tiempos de espera
     assigned_data = assign_times(nodes, epsilon)
-    # Realizar llamadas concurrentes a los nodos activos de la red con su tiempo de espera
     responses = await asyncio.gather(
         *[send_poet_request(node) for node in assigned_data]
     )
 
-    # Ordenar las respuestas por el tiempo de espera real
-    sorted_responses = sorted(responses, key=lambda x: x["real_waited_time"])
+    # Filtrar las respuestas que tuvieron éxito
+    valid_responses = [
+        response
+        for response in responses
+        if response["real_waited_time"] != float("inf")
+    ]
 
-    # Imprimir todas las respuestas
-    for response in sorted_responses:
-        print(
-            f"assigned_time nodo {response['ip']}: {response['assigned_time']}, "
-            f"real_time nodo {response['ip']} : {response['real_waited_time']}"
-        )
+    if not valid_responses:
+        raise Exception("No se pudo contactar a ningún nodo exitosamente.")
 
-    return sorted_responses
+    sorted_responses = sorted(valid_responses, key=lambda x: x["real_waited_time"])
+
+    return sorted_responses[0]
