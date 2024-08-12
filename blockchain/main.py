@@ -15,6 +15,7 @@ from routers.blockchain_router import router as blc_router
 from routers.consensus_router import router as poet_router
 from routers.transactions_router import router as tx_router
 from routers.block_router import router as block_router
+from routers.node_router import router as node_router
 from main3 import router as test_router
 
 # Cargar variables de entorno desde el archivo .env
@@ -53,6 +54,7 @@ app.include_router(poet_router)
 app.include_router(tx_router)
 app.include_router(test_router)
 app.include_router(block_router)
+app.include_router(node_router)
 
 
 @app.on_event("startup")

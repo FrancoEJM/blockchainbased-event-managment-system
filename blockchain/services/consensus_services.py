@@ -9,6 +9,10 @@ import asyncio
 import httpx
 import aiohttp
 import time
+import os
+
+
+NODE_ID = os.getenv("NODE_ID", 0)
 
 
 # Con 1 <= epsilon <= 10
@@ -116,6 +120,7 @@ async def send_poet_request(node):
                 )
 
                 return {
+                    "id": NODE_ID,
                     "ip": node["ip"],
                     "assigned_time": node["assigned_time"],
                     "real_waited_time": real_waited_time,
@@ -127,6 +132,7 @@ async def send_poet_request(node):
             # Manejar la excepción y retornar None o un diccionario con un estado de error
             print(f"Error al contactar al nodo {node['ip']}: {str(e)}")
             return {
+                "id": NODE_ID,
                 "ip": node["ip"],
                 "assigned_time": node["assigned_time"],
                 "real_waited_time": float(
@@ -138,16 +144,67 @@ async def send_poet_request(node):
             }
 
 
+# async def proof_of_elapsed_time(nodes, epsilon):
+#     assigned_data = assign_times(nodes, epsilon)
+#     responses = await asyncio.gather(
+#         *[send_poet_request(node) for node in assigned_data]
+#     )
+
+#     # Filtrar las respuestas que tuvieron éxito
+#     valid_responses = [
+#         response
+#         for response in responses
+#         if response["real_waited_time"] != float("inf")
+#     ]
+
+#     if not valid_responses:
+#         raise Exception("No se pudo contactar a ningún nodo exitosamente.")
+
+#     sorted_responses = sorted(valid_responses, key=lambda x: x["real_waited_time"])
+
+#     return sorted_responses[0]
+
+
+async def send_update_all_nodes(node_ips, assigned_data):
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for node_ip in node_ips:
+            url = f"http://{node_ip}/blockchain/nodes/waited_times"
+            tasks.append(session.post(url, json=assigned_data))
+
+        responses = await asyncio.gather(*tasks, return_exceptions=True)
+
+        results = []
+        for response in responses:
+            if isinstance(response, Exception):
+                print(f"Error al enviar actualización de tiempos: {str(response)}")
+                results.append({"status": "failed", "error": str(response)})
+            else:
+                result = await response.json()
+                results.append({"status": "success", "response": result})
+
+        return results
+
+
 async def proof_of_elapsed_time(nodes, epsilon):
     assigned_data = assign_times(nodes, epsilon)
-    responses = await asyncio.gather(
-        *[send_poet_request(node) for node in assigned_data]
-    )
+
+    async with aiohttp.ClientSession() as session:
+        # Primero, enviar las solicitudes de prueba PoET a cada nodo
+        poet_responses = await asyncio.gather(
+            *[send_poet_request(node) for node in assigned_data]
+        )
+
+        # Recoger las IPs de los nodos
+        node_ips = [node["ip"] for node in assigned_data]
+
+        # Enviar la lista completa de nodos y sus assigned_time a todos los nodos
+        update_responses = await send_update_all_nodes(node_ips, assigned_data)
 
     # Filtrar las respuestas que tuvieron éxito
     valid_responses = [
         response
-        for response in responses
+        for response in poet_responses
         if response["real_waited_time"] != float("inf")
     ]
 

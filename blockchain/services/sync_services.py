@@ -3,6 +3,9 @@ import sqlalchemy.orm as _orm
 import aiohttp
 import asyncio
 import logging
+import os
+
+BLOCKCHAIN_DIR = "/BLOCKCHAIN"
 
 
 async def notify_status_change(id: int, status: bool, db: _orm.Session):
@@ -78,3 +81,32 @@ async def update_and_notify_status(
         logging.error(f"Ocurrió un error: {e}")
     finally:
         db.close()
+
+
+async def spread_block(filename: str, db: _orm.Session):
+    async def send_block_to_node(node_ip: str, block_data: bytes):
+        url = f"http://{node_ip}/blockchain/block/latest"
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.post(url, data=block_data) as response:
+                    if response.status == 200:
+                        print(f"Block successfully sent to node {node_ip}")
+                    else:
+                        print(
+                            f"Failed to send block to node {node_ip}. Status code: {response.status}"
+                        )
+            except Exception as e:
+                print(f"Error sending block to node {node_ip}: {e}")
+
+    # Leer el contenido del archivo
+    file_path = os.path.join(BLOCKCHAIN_DIR, filename)
+    with open(file_path, "rb") as file:
+        block_data = file.read()
+
+    # Obtener nodos activos
+    active_nodes = await blc_sv.get_active_nodes(db)
+    nodes = [{"ip": node.ip} for node in active_nodes]
+
+    # Enviar el bloque a todos los nodos
+    tasks = [send_block_to_node(node["ip"], block_data) for node in nodes]
+    await asyncio.gather(*tasks)

@@ -45,15 +45,25 @@ PROTOCOL_VERSION = os.getenv("PROTOCOL_VERSION")
 
 # Función para obtener el hash de un bloque
 def get_hash(block_number: int):
-    block_number = f"{block_number:08d}"
+    block_number_str = f"{block_number:08d}"
     try:
         # Buscar el archivo correspondiente al block_number en la carpeta BLOCKCHAIN
-        files = glob.glob(f"BLOCKCHAIN/{block_number}_*.txt")
+        files = glob.glob(f"BLOCKCHAIN/{block_number_str}_*.txt")
         if files:
             with open(files[0], "r") as f:
                 block_data = json_lib.load(f)
-                return block_data["block_hash"]
-        return "0" * 64
+
+                # Verificar si la clave 'block_hash' existe en los datos
+                if "block_hash" in block_data:
+                    return block_data["block_hash"]
+                else:
+                    print(f"'block_hash' no encontrado en el archivo: {files[0]}")
+                    return "0" * 64
+        else:
+            print(
+                f"No se encontró ningún archivo con el número de bloque {block_number_str}"
+            )
+            return "0" * 64
     except Exception as e:
         print(f"Error al obtener el hash del bloque anterior: {e}")
         return None
@@ -74,26 +84,20 @@ async def write_block(event_data: str, waited_time: float, db: _orm.Session):
     5. Firma digital del organizador del evento ✅
     6. Organización a la que pertenece ✅
     """
-
+    # Datos de la cabecera del bloque
     block_number = await blc_sv.get_next_block_number(db)
-
     timestamp = time.time()
-
     previous_hash = get_hash(int(block_number) - 1)
-
     protocol_version = PROTOCOL_VERSION
 
+    # Datos del cuerpo del bloque
     event_id = event_data["id_evento"]
-
     nonce = waited_time
-
     transactions = event_data["transacciones"]
     encrypted_transactions = crypto_sv.encrypt_transactions(transactions)
-
+    # encrypted_transactions = transactions
     digital_signature = event_data["firma_digital"]
-
     organizer = event_data["organizador"]
-
     organization = event_data["organizacion"]
 
     # Ensamblar los datos del bloque

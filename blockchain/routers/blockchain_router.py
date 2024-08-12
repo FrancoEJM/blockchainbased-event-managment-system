@@ -56,10 +56,6 @@ async def process_transactions(
         response = await client.post(url, json=payload)
 
     return response.json()
-    # new_block = await blc_sv.add_new_block(
-    #     event_data, selected_node["ip"], selected_node["real_waited_time"], db
-    # )
-    # return new_block
 
 
 @router.post("/create-genesis-block")
@@ -77,8 +73,3 @@ async def create_genesis_block(db: _orm.Session = _fastapi.Depends(db_sv.get_db)
 
     genesis_block = await block_sv.write_block(genesis_event_data, 0, db)
     return {"message": "Genesis block created successfully", "block": genesis_block}
-
-
-@router.get("/api/nodes")
-async def get_events_list(db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
-    return await blc_sv.get_active_nodes(db)

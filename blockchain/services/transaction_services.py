@@ -4,7 +4,6 @@ from dateutil.parser import parse as parse_date
 
 
 async def validate_transactions(event_data):
-    return True
     transacciones = event_data["transacciones"]
     tipo_1 = None
     tipo_3 = None
