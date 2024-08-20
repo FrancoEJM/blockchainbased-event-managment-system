@@ -4,12 +4,31 @@ import random
 import requests
 import subprocess
 from time import sleep
+from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
+from models import blockchain_models as blc_md
 
 
-def create_dotenv_file(ip, port):
+def create_tables(database_url):
+    try:
+        # Crear el motor de SQLAlchemy
+        engine = create_engine(database_url)
+
+        # Crear las tablas en la base de datos
+        blc_md.Base.metadata.create_all(engine)
+        print("Tablas creadas exitosamente.")
+
+    except SQLAlchemyError as e:
+        # Manejo de errores en caso de que no se puedan crear las tablas
+        print(f"Error al crear las tablas: {e}")
+        raise  # Lanzar la excepción para detener el programa
+
+
+def create_dotenv_file(ip, port, database_url):
     with open(".env", "w") as f:
         f.write(f"IP={ip}\n")
         f.write(f"PORT={port}\n")
+        f.write(f"DATABASE_URL={database_url}\n")
 
 
 def start_uvicorn(ip, port):
@@ -34,10 +53,13 @@ def add_node_to_network(blc_config_file, org_config_file):
         org_config = next(csv_reader)
         ip = org_config["ip"]
         port = org_config["port"]
+        database = org_config["database_url"]
 
     # Generar el archivo .env con la IP y el puerto
-    create_dotenv_file(ip, port)
+    create_dotenv_file(ip, port, database)
 
+    # Crear tablas
+    create_tables(database)
     # Encontrar el nodo activo (esta parte de la función no se proporciona)
     active_node = find_running_node(blc_config_file)
     if not active_node:

@@ -13,6 +13,7 @@ from services import (
 )
 import os
 import dotenv
+import glob
 
 
 async def get_active_nodes(db: _orm.Session):
@@ -32,8 +33,8 @@ async def update_node_status(ip: str, port: int, status: bool, db: _orm.Session)
 
 async def get_next_block_number(db: _orm.Session):
     block_count = db.query(_sqlalchemy.func.count(blc_md.BLOQUES.id_bloque)).scalar()
-    next_block_number = block_count + 1
-    return f"{next_block_number:08d}"
+    next_block_number = block_count
+    return next_block_number
 
 
 async def add_new_block(event_data, waited_time: float, db: _orm.Session):
@@ -77,7 +78,6 @@ async def add_new_block(event_data, waited_time: float, db: _orm.Session):
 
     # Compresión
     zipped = await compress_sv.zip_block(writed["filename"])
-    zipped = True
     if not zipped:
         return {
             "status": _fastapi.status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -85,9 +85,9 @@ async def add_new_block(event_data, waited_time: float, db: _orm.Session):
             "steps": response_message,
         }
     response_message["bloque_comprimido"] = "ok"
-
+    delete_txt_from_folder()
     # Adición del bloque a la red
-    shared = await sync_sv.spread_block(writed["filename"], db)
+    shared = await sync_sv.spread_block(writed["filename"].replace(".txt", ".zip"), db)
     if not shared:
         return {
             "status": _fastapi.status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -102,4 +102,20 @@ async def add_new_block(event_data, waited_time: float, db: _orm.Session):
         "file_name": writed["filename"],
         "timestamp": writed["timestamp"],
         "node_id": os.getenv("NODE_ID"),
+        "block_number": writed["block_number"],
     }
+
+
+def delete_txt_from_folder():
+    folder = "BLOCKCHAIN/"
+
+    # Buscar todos los archivos .txt en la carpeta BLOCKCHAIN
+    txt_files = glob.glob(os.path.join(folder, "*.txt"))
+
+    # Eliminar cada archivo .txt encontrado
+    for file in txt_files:
+        try:
+            os.remove(file)
+            print(f"Archivo eliminado: {file}")
+        except Exception as e:
+            print(f"No se pudo eliminar el archivo {file}: {e}")

@@ -27,3 +27,8 @@ async def zip_block(filename: str):
     except Exception as e:
         print(f"Error al comprimir el archivo: {str(e)}")
         raise
+
+
+def unzip_file(zip_filename, extract_to):
+    with zipfile.ZipFile(zip_filename, "r") as zip_ref:
+        zip_ref.extractall(extract_to)

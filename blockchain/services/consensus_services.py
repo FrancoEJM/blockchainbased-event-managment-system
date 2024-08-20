@@ -10,6 +10,7 @@ import httpx
 import aiohttp
 import time
 import os
+import logging
 
 
 NODE_ID = os.getenv("NODE_ID", 0)
@@ -19,6 +20,7 @@ NODE_ID = os.getenv("NODE_ID", 0)
 # epsilon bajo, asignación aleatoria.
 # epsilon alto, el nodo con mayor tiempo de espera tiene mayor probabilidad de obtener un tiempo bajo.
 def assign_times(nodes, epsilon):
+    epsilon = 9
     # Número de nodos
     n = len(nodes)
 
@@ -99,6 +101,7 @@ async def send_poet_request(node):
         sock_connect=5,  # Tiempo máximo para conectar al socket en segundos
         sock_read=10,  # Tiempo máximo para leer desde el socket en segundos
     )
+    logging.info(f"PoET para el nodo {node["ip"]}")
 
     async with aiohttp.ClientSession(timeout=timeout) as session:
         url = f"http://{node['ip']}/poet-wait"
@@ -109,6 +112,7 @@ async def send_poet_request(node):
         }
         try:
             async with session.post(url, json=payload) as response:
+                logging.info(f"response_poet: {response}")
                 response.raise_for_status()  # Lanzar una excepción para códigos de estado HTTP 4xx/5xx
                 response_data = await response.json()
                 server_timestamp = response_data.get("server_timestamp", time.time())
@@ -188,7 +192,7 @@ async def send_update_all_nodes(node_ips, assigned_data):
 
 async def proof_of_elapsed_time(nodes, epsilon):
     assigned_data = assign_times(nodes, epsilon)
-
+    logging.info(assigned_data)
     async with aiohttp.ClientSession() as session:
         # Primero, enviar las solicitudes de prueba PoET a cada nodo
         poet_responses = await asyncio.gather(
@@ -201,6 +205,7 @@ async def proof_of_elapsed_time(nodes, epsilon):
         # Enviar la lista completa de nodos y sus assigned_time a todos los nodos
         update_responses = await send_update_all_nodes(node_ips, assigned_data)
 
+    logging.info(f"PoET responses de todos los nodos: {poet_responses}")
     # Filtrar las respuestas que tuvieron éxito
     valid_responses = [
         response

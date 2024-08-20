@@ -16,6 +16,7 @@ from routers.consensus_router import router as poet_router
 from routers.transactions_router import router as tx_router
 from routers.block_router import router as block_router
 from routers.node_router import router as node_router
+from routers.sync_router import router as sync_router
 from main3 import router as test_router
 
 # Cargar variables de entorno desde el archivo .env
@@ -35,7 +36,13 @@ logging.basicConfig(
 )
 
 app = _fastapi.FastAPI()
-origins = ["http://localhost:8000", "http://localhost:8001"]
+origins = [
+    "http://localhost:8000",
+    "http://localhost:8001",
+    "http://localhost:8002",
+    "http://localhost:8003",
+    "http://localhost:8004",
+]
 
 
 app.add_middleware(
@@ -55,13 +62,18 @@ app.include_router(tx_router)
 app.include_router(test_router)
 app.include_router(block_router)
 app.include_router(node_router)
+app.include_router(sync_router)
 
 
 @app.on_event("startup")
 async def startup_event():
     db_gen = db_sv.get_db()
     db = next(db_gen)
-    logging.info("Inicializando nodo...")
+    logging.info("------------------------------------------------------")
+    logging.info(f"Inicializando nodo ID:{NODE_ID}...")
+    logging.info("------------------------------------------------------")
+    logging.info("Sincronizando la información con los nodos de la red...")
+    await sync_sv.get_current_data(IP, PORT, NODE_ID, db)
     logging.info("------------------------------------------------------")
     await sync_sv.update_and_notify_status(IP, PORT, True, NODE_ID, db)
     logging.info("------------------------------------------------------")

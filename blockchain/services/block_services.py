@@ -5,8 +5,13 @@ from datetime import datetime
 import json as json_lib
 import sqlalchemy.orm as _orm
 from dateutil.parser import parse as parse_date
-from services import blockchain_services as blc_sv, cryptography_services as crypto_sv
+from services import (
+    blockchain_services as blc_sv,
+    cryptography_services as crypto_sv,
+    compression_services as compression_sv,
+)
 from models import blockchain_models as blc_md
+import logging
 
 PROTOCOL_VERSION = os.getenv("PROTOCOL_VERSION")
 
@@ -43,29 +48,126 @@ PROTOCOL_VERSION = os.getenv("PROTOCOL_VERSION")
 #     return previous_block_hash
 
 
+# # Función para obtener el hash de un bloque
+# def get_hash(block_number: int):
+#     block_number_str = f"{block_number:08d}"
+#     try:
+#         # Buscar el archivo correspondiente al block_number en la carpeta BLOCKCHAIN
+#         files = glob.glob(f"BLOCKCHAIN/{block_number_str}_*.txt")
+#         if files:
+#             with open(files[0], "r") as f:
+#                 block_data = json_lib.load(f)
+
+#                 # Verificar si la clave 'block_hash' existe en los datos
+#                 if "block_hash" in block_data:
+#                     return block_data["block_hash"]
+#                 else:
+#                     print(f"'block_hash' no encontrado en el archivo: {files[0]}")
+#                     return "0" * 64
+#         else:
+#             print(
+#                 f"No se encontró ningún archivo con el número de bloque {block_number_str}"
+#             )
+#             return "0" * 64
+#     except Exception as e:
+#         print(f"Error al obtener el hash del bloque anterior: {e}")
+#         return None
+
+
 # Función para obtener el hash de un bloque
+# def get_hash(block_number: int):
+#     block_number_str = f"{block_number:08d}"
+#     try:
+#         # Buscar el archivo correspondiente al block_number en la carpeta BLOCKCHAIN
+#         zip_files = glob.glob(f"BLOCKCHAIN/{block_number_str}_*.zip")
+#         if zip_files:
+#             zip_filename = zip_files[0]
+#             extract_to = "temp_extracted"
+#             # Crear la carpeta temporal si no existe
+#             if not os.path.exists(extract_to):
+#                 os.makedirs(extract_to)
+#             # Asegurarse de que la carpeta esté vacía antes de la extracción
+#             for file in os.listdir(extract_to):
+#                 os.remove(os.path.join(extract_to, file))
+#             # Descomprimir el archivo .zip
+#             compression_sv.unzip_file(zip_filename, extract_to)
+
+#             # Buscar el archivo .txt descomprimido
+#             txt_files = glob.glob(f"{extract_to}/{block_number_str}_*.txt")
+#             if txt_files:
+#                 with open(txt_files[0], "r") as f:
+#                     block_data = json_lib.load(f)
+
+#                     # Verificar si la clave 'block_hash' existe en los datos
+#                     if "block_hash" in block_data:
+#                         # Limpiar la carpeta temporal después de leer el archivo
+#                         os.remove(txt_files[0])
+#                         return block_data["block_hash"]
+#                     else:
+#                         print(
+#                             f"'block_hash' no encontrado en el archivo: {txt_files[0]}"
+#                         )
+#                         return "0" * 64
+#             else:
+#                 print(
+#                     f"No se encontró ningún archivo .txt en el archivo .zip: {zip_filename}"
+#                 )
+#                 return "0" * 64
+#         else:
+#             print(
+#                 f"No se encontró ningún archivo .zip con el número de bloque {block_number_str}"
+#             )
+#             return "0" * 64
+#     except Exception as e:
+#         print(f"Error al obtener el hash del bloque: {e}")
+#         return None
+
+
 def get_hash(block_number: int):
     block_number_str = f"{block_number:08d}"
     try:
         # Buscar el archivo correspondiente al block_number en la carpeta BLOCKCHAIN
-        files = glob.glob(f"BLOCKCHAIN/{block_number_str}_*.txt")
-        if files:
-            with open(files[0], "r") as f:
-                block_data = json_lib.load(f)
+        zip_files = glob.glob(f"BLOCKCHAIN/{block_number_str}_*.zip")
+        if zip_files:
+            zip_filename = zip_files[0]
+            extract_to = "temp_extracted"  # Crear la carpeta temporal si no existe
+            if not os.path.exists(extract_to):
+                os.makedirs(extract_to)
+
+            # Asegurarse de que la carpeta esté vacía antes de la extracción
+            for file in os.listdir(extract_to):
+                os.remove(os.path.join(extract_to, file))
+
+            # Descomprimir el archivo .zip
+            compression_sv.unzip_file(zip_filename, extract_to)
+
+            # Buscar el archivo .txt descomprimido
+            txt_files = glob.glob(f"{extract_to}/{block_number_str}_*.txt")
+            if txt_files:
+                # Asegurarse de cerrar el archivo después de leerlo
+                with open(txt_files[0], "r") as f:
+                    block_data = json_lib.load(f)
 
                 # Verificar si la clave 'block_hash' existe en los datos
                 if "block_hash" in block_data:
+                    # Limpiar la carpeta temporal después de leer el archivo
+                    os.remove(txt_files[0])
                     return block_data["block_hash"]
                 else:
-                    print(f"'block_hash' no encontrado en el archivo: {files[0]}")
+                    print(f"'block_hash' no encontrado en el archivo: {txt_files[0]}")
                     return "0" * 64
+            else:
+                print(
+                    f"No se encontró ningún archivo .txt en el archivo .zip: {zip_filename}"
+                )
+                return "0" * 64
         else:
             print(
-                f"No se encontró ningún archivo con el número de bloque {block_number_str}"
+                f"No se encontró ningún archivo .zip con el número de bloque {block_number_str}"
             )
             return "0" * 64
     except Exception as e:
-        print(f"Error al obtener el hash del bloque anterior: {e}")
+        print(f"Error al obtener el hash del bloque: {e}")
         return None
 
 
@@ -102,7 +204,7 @@ async def write_block(event_data: str, waited_time: float, db: _orm.Session):
 
     # Ensamblar los datos del bloque
     block_data = {
-        "block_number": block_number,
+        "block_number": f"{block_number:08d}",
         "timestamp": timestamp,
         "previous_hash": previous_hash,
         "protocol_version": protocol_version,
@@ -125,15 +227,22 @@ async def write_block(event_data: str, waited_time: float, db: _orm.Session):
 
     # Nombrar y escribir el archivo
     file_name = (
-        f"BLOCKCHAIN/{block_number}_{organization}_{event_id}_{int(timestamp)}.txt"
+        f"BLOCKCHAIN/{block_number:08d}_{organization}_{event_id}_{int(timestamp)}.txt"
     )
+    logging.info(f"Escribiendo el bloque: {file_name}")
     with open(file_name, "w") as block_file:
         block_file.write(json_lib.dumps(block_data, indent=4))
 
-    return {"filename": file_name, "timestamp": timestamp}
+    return {
+        "filename": file_name,
+        "timestamp": timestamp,
+        "block_number": int(block_number),
+    }
 
 
-async def record_block_data(event_data, filename, timestamp, db: _orm.Session):
+async def record_block_data(
+    event_data, filename, timestamp, block_number, db: _orm.Session
+):
     event_id = event_data["id_evento"]
     organization = event_data["organizacion"]
     creator = event_data["organizador"]
@@ -158,6 +267,7 @@ async def record_block_data(event_data, filename, timestamp, db: _orm.Session):
     print("------------------------------------------------------------")
     # Crear un nuevo objeto BLOQUES
     new_block = blc_md.BLOQUES(
+        id_bloque=block_number - 1,
         fecha_inicio=parsed_start_date,
         fecha_fin=parsed_end_date,
         id_evento=event_id,
@@ -165,6 +275,7 @@ async def record_block_data(event_data, filename, timestamp, db: _orm.Session):
         creador=creator,
         path=filename,
         timestamp=timestamp,
+        numero_bloque=block_number,
     )
 
     db.add(new_block)

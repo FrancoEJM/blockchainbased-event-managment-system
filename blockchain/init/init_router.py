@@ -55,7 +55,7 @@ async def send_all_data(
 
     files_data = []
     for filename in os.listdir(blockchain_folder):
-        if filename.endswith(".txt"):
+        if filename.endswith(".zip"):
             filepath = os.path.join(blockchain_folder, filename)
             with open(filepath, "r") as file:
                 file_data = file.read()

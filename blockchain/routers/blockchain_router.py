@@ -13,6 +13,8 @@ from typing import List, Dict
 import asyncio
 import httpx
 import json as json_lib
+import logging
+from json import JSONDecodeError
 
 router = _fastapi.APIRouter()
 
@@ -43,7 +45,7 @@ async def process_transactions(
 
     # Aplica el mecanismo de consenso
     selected_node = await consensus_sv.proof_of_elapsed_time(formatted_nodes, 8)
-
+    logging.info(f"Selected Node: {selected_node}")
     # Petición de adición de bloque al nodo escogido
     node_ip = selected_node["ip"]
     url = f"http://{node_ip}/blockchain/block"
@@ -54,8 +56,20 @@ async def process_transactions(
 
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=payload)
+    logging.info(response.text)
+    if response.status_code != 200:
+        print(f"Error en la solicitud: {response.status_code} - {response.text}")
+        return
+    try:
+        data = response.json()
+    except JSONDecodeError as e:
+        logging.error("Error decodificando JSON: %s", e)
+        logging.error("Contenido de la respuesta: %s", response.text)
+        # Opcional: lanzar una nueva excepción o retornar un error específico
+        raise ValueError("Fallo al decodificar el JSON de la respuesta") from e
 
-    return response.json()
+    # Retornar la respuesta procesada si es necesario
+    return {"status": "success", "data": data}
 
 
 @router.post("/create-genesis-block")
@@ -73,3 +87,8 @@ async def create_genesis_block(db: _orm.Session = _fastapi.Depends(db_sv.get_db)
 
     genesis_block = await block_sv.write_block(genesis_event_data, 0, db)
     return {"message": "Genesis block created successfully", "block": genesis_block}
+
+
+@router.get("/ping")
+async def ping():
+    return True

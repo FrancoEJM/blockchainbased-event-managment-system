@@ -44,4 +44,5 @@ async def poet_wait(data: dict):
         "assigned_time": assigned_time,
         "client_timestamp": client_timestamp,
         "server_timestamp": server_timestamp,
+        "message": "waited",
     }

@@ -14,6 +14,20 @@ class BLOQUES(Base):
     creador = _sql.Column(_sql.Integer)
     path = _sql.Column(_sql.String)
     timestamp = _sql.Column(_sql.Date)
+    numero_bloque = _sql.Column(_sql.Integer)
+
+    def to_dict(self):
+        return {
+            "id_bloque": self.id_bloque,
+            "fecha_inicio": self.fecha_inicio,
+            "fecha_fin": self.fecha_fin,
+            "id_evento": self.id_evento,
+            "org": self.org,
+            "creador": self.creador,
+            "path": self.path,
+            "timestamp": self.timestamp,
+            "numero_bloque": self.numero_bloque,
+        }
 
 
 class NODOS(Base):
