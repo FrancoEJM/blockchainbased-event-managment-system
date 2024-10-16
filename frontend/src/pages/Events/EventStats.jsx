@@ -1,9 +1,9 @@
 import EventDisplayStats from "../../components/Events/EventDisplayStats";
-import Navbar from "../../components/Navbar";
+import NavbarTest from "../../components/NavbarTest";
 function EventStats() {
   return (
     <>
-      <Navbar />
+      <NavbarTest />
       <EventDisplayStats />
     </>
   );

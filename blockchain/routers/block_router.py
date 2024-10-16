@@ -232,7 +232,7 @@ async def receive_block(
         # Crear un nuevo registro de bloque
         new_block = blc_md.BLOQUES(
             id_bloque=int(block_number) + 1,
-            path="BLOCKCHAIN/" + zip_file_location,
+            path=zip_file_location,
             id_evento=event_id,
             org=organization,
             fecha_inicio=None,

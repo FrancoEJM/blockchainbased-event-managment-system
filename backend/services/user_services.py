@@ -91,6 +91,7 @@ async def save_attendee_data(
         genero=gender,
         nombre_completo=fullname,
         fecha_nacimiento=birth_datetime,
+        fecha_arribo=_dt.datetime.now(_dt.timezone.utc),
     )
     db.add(attendee_data_obj)
     db.commit()

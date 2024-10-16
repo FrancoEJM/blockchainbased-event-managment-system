@@ -1,5 +1,7 @@
 import StartEvent from "../icons/StartEvent";
 import axios from "axios";
+import { Button } from "flowbite-react";
+import { HiPlay } from "react-icons/hi";
 
 function StartEventButton({ event, onStartEvent, onStartEventSuccess }) {
   const startPublicEvent = async () => {
@@ -63,13 +65,25 @@ function StartEventButton({ event, onStartEvent, onStartEventSuccess }) {
     }
   };
   return (
-    <button
-      className="p-4 ml-4 bg-violet-300 rounded-full"
-      title="Comenzar el evento"
-      onClick={event.privacidad == 1 ? startPublicEvent : startPrivateEvent}
+    // <button
+    //   className="p-4 ml-4 bg-violet-300 rounded-full"
+    //   title="Comenzar el evento"
+    // >
+    //   <StartEvent />
+    // </button>
+
+    <Button
+      onClick={event.privacidad === 1 ? startPublicEvent : startPrivateEvent}
+      className="ring-cyan-700 border border-gray-200 bg-white text-gray-900 focus:text-cyan-700 focus:ring-4 enabled:hover:bg-gray-100 enabled:hover:text-violet-700 dark:border-gray-600 dark:bg-transparent dark:text-gray-400 dark:enabled:hover:bg-gray-700 dark:enabled:hover:text-white"
     >
-      <StartEvent />
-    </button>
+      {/* Texto visible solo en pantallas grandes */}
+      <span className="hidden sm:inline">Iniciar Evento</span>
+
+      {/* Ícono visible solo en pantallas pequeñas */}
+      <span className="inline sm:hidden">
+        <HiPlay size={20} /> {/* Ajusta el tamaño del ícono si es necesario */}
+      </span>
+    </Button>
   );
 }
 export default StartEventButton;

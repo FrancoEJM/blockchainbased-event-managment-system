@@ -19,13 +19,15 @@ class BLOQUES(Base):
     def to_dict(self):
         return {
             "id_bloque": self.id_bloque,
-            "fecha_inicio": self.fecha_inicio,
-            "fecha_fin": self.fecha_fin,
+            "fecha_inicio": self.fecha_inicio.isoformat()
+            if self.fecha_inicio
+            else None,
+            "fecha_fin": self.fecha_fin.isoformat() if self.fecha_fin else None,
             "id_evento": self.id_evento,
             "org": self.org,
             "creador": self.creador,
             "path": self.path,
-            "timestamp": self.timestamp,
+            "timestamp": self.timestamp.isoformat() if self.timestamp else None,
             "numero_bloque": self.numero_bloque,
         }
 
@@ -41,3 +43,16 @@ class NODOS(Base):
     organizacion = _sql.Column(_sql.String)
     ip = _sql.Column(_sql.String)
     port = _sql.Column(_sql.Integer)
+
+    def to_dict(self):
+        return {
+            "id_nodo": self.id_nodo,
+            "fecha_creacion": self.fecha_creacion.isoformat()
+            if self.fecha_creacion
+            else None,
+            "tiempo_esperado": self.tiempo_esperado,
+            "status": self.status,
+            "organizacion": self.organizacion,
+            "ip": self.ip,
+            "port": self.port,
+        }

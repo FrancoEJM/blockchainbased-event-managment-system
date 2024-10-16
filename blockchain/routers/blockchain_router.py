@@ -69,7 +69,11 @@ async def process_transactions(
         raise ValueError("Fallo al decodificar el JSON de la respuesta") from e
 
     # Retornar la respuesta procesada si es necesario
-    return {"status": "success", "data": data}
+    return {
+        "status": "success",
+        "data": data,
+        "status_code": _fastapi.status.HTTP_200_OK,
+    }
 
 
 @router.post("/create-genesis-block")

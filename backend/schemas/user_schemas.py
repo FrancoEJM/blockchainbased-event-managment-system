@@ -25,6 +25,13 @@ class User(_UserBase):
         from_attributes = True
 
 
+class UserDetails(_UserBase):
+    id_usuario: int
+    nombre: str
+    apellido: str
+    correo_electronico: str
+
+
 class AttendeeDetails(_pydantic.BaseModel):
     event_id: int
     gender: int

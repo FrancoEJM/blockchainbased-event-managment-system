@@ -7,6 +7,7 @@ from services import (
     user_services as user_sv,
     event_user_services as event_user_sv,
 )
+from models import user_models as user_md
 
 router = _fastapi.APIRouter()
 
@@ -27,6 +28,33 @@ async def create_user(
 @router.get("/api/users/me", response_model=user_sch.User)
 async def get_user(user: user_sch.User = _fastapi.Depends(user_sv.get_current_user)):
     return user
+
+
+@router.get("/api/user/me/details", response_model=user_sch.UserDetails)
+async def get_user_details(
+    current_user: user_sch.User = _fastapi.Depends(user_sv.get_current_user),
+    db: _orm.Session = _fastapi.Depends(db_sv.get_db),
+):
+    # Consulta adicional para obtener el usuario completo desde el modelo Usuario
+
+    user = (
+        db.query(user_md.Usuario).filter_by(id_usuario=current_user.id_usuario).first()
+    )
+    if user is None:
+        raise _fastapi.HTTPException(
+            status_code=_fastapi.status.HTTP_404_NOT_FOUND,
+            detail="Usuario no encontrado",
+        )
+
+    # Crear un objeto UserDetails con la información del usuario completo
+    user_details = user_sch.UserDetails(
+        id_usuario=user.id_usuario,
+        nombre=user.nombre,
+        apellido=user.apellido,
+        correo_electronico=user.correo_electronico,
+        # Agrega otros campos si es necesario
+    )
+    return user_details
 
 
 @router.post("/api/user/unregistered_details")

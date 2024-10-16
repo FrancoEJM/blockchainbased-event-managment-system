@@ -1,0 +1,7 @@
+/* Ocultar en pantallas con ancho menor o igual a 768px */
+@media (max-width: 768px) {
+    .hide-on-mobile {
+      display: none;
+    }
+  }
+  

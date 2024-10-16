@@ -1,0 +1,16 @@
+.buttons-container {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .truncate-lines {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 3; /* Limitar a tres líneas */
+    line-clamp: 3;
+    line-height: 1.5em; /* Altura de línea, ajusta si es necesario */
+    max-height: 4.5em; /* Tres veces la altura de línea */
+  }
+  

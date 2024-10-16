@@ -9,7 +9,12 @@ from routers.event_user_router import router as eu_router
 from routers.util_router import router as util_router
 
 app = _fastapi.FastAPI()
-origins = ["http://localhost:5173"]
+origins = [
+    "http://localhost:5173",
+    "http://192.168.1.18:5173",
+    "https://cbcb-179-57-154-53.ngrok-free.app",
+    "https://d727-179-57-154-53.ngrok-free.app",
+]
 
 app.add_middleware(
     _CORS.CORSMiddleware,

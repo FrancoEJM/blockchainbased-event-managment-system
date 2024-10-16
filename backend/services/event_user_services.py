@@ -88,7 +88,6 @@ async def register_user_in_event(
     birthdate: str = None,
     name: str = None,
 ):
-    print("me ejecto......................")
     user_obj = eu_md.EventoUsuario(
         id_evento=event_id,
         id_usuario=0,

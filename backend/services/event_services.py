@@ -54,11 +54,10 @@ async def create_event(id: int, event: event_sch.EventCreate, db: _orm.Session):
         fecha=event.fecha,
         idioma=event.idioma,
         privacidad=event.privacidad,
-        modalidad=event.modalidad,
-        url_evento=event.url_evento,
         direccion=event.direccion,
         latitud=event.latitud,
         longitud=event.longitud,
+        descripcion=event.descripcion,
     )
     db.add(event_obj)
     db.commit()
@@ -96,7 +95,7 @@ async def end_event(event_id: int, db: _orm.Session):
 
 
 async def save_event_image(id, name, path, db: _orm.Session):
-    image_obj = event_md.EventosImagenes(id_evento=id, nombre=name, path=path)
+    image_obj = event_md.EventosImagenes(id_evento=id, nombre=name, path="/" + path)
     db.add(image_obj)
     db.commit()
     db.refresh(image_obj)

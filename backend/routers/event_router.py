@@ -13,10 +13,11 @@ from services import (
 
 import os
 import qrcode
+import logging
 
 router = _fastapi.APIRouter()
 
-UPLOAD_DIRECTORY = "/data/eventImages/"
+UPLOAD_DIRECTORY = "data/eventImages/"
 os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
 
 
@@ -65,6 +66,26 @@ async def create_new_event(
     return create_event
 
 
+# @router.post("/api/event/upload")
+# async def upload_event_image(
+#     id: int,
+#     file: _fastapi.UploadFile = _fastapi.File(...),
+#     db: _orm.Session = _fastapi.Depends(db_sv.get_db),
+# ):
+#     try:
+#         new_filename = f"{id}_{file.filename}"
+#         with open(os.path.join(UPLOAD_DIRECTORY, new_filename), "wb") as buffer:
+#             buffer.write(await file.read())
+
+#         new_image = await event_sv.save_event_image(
+#             id, file.filename, f"{UPLOAD_DIRECTORY}{new_filename}", db
+#         )
+
+#         return {"new_image": new_image}
+#     except Exception as e:
+#         raise _fastapi.HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/api/event/upload")
 async def upload_event_image(
     id: int,
@@ -73,15 +94,25 @@ async def upload_event_image(
 ):
     try:
         new_filename = f"{id}_{file.filename}"
+
+        content = await file.read()
+        if not content:
+            print("Failed to read the content of the uploaded file.")
+            raise _fastapi.HTTPException(
+                status_code=400, detail="File content is empty."
+            )
+
         with open(os.path.join(UPLOAD_DIRECTORY, new_filename), "wb") as buffer:
-            buffer.write(await file.read())
+            buffer.write(content)
 
         new_image = await event_sv.save_event_image(
-            id, file.filename, f"{UPLOAD_DIRECTORY}{new_filename}", db
+            id, file.filename, os.path.join(UPLOAD_DIRECTORY, new_filename), db
         )
 
+        logging.info(f"File saved successfully as {new_filename}")
         return {"new_image": new_image}
     except Exception as e:
+        logging.error(f"Error while uploading image: {str(e)}")
         raise _fastapi.HTTPException(status_code=500, detail=str(e))
 
 
@@ -132,17 +163,22 @@ async def start_event(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.g
 
 
 @router.post("/api/event/end")
-async def end_event(event_id: int, db: _orm.Session = _fastapi.Depends(db_sv.get_db)):
+async def end_event(
+    event_id: int,
+    background_tasks: _fastapi.BackgroundTasks,
+    db: _orm.Session = _fastapi.Depends(db_sv.get_db),
+):
     try:
         finished_event = await event_sv.end_event(event_id, db)
         if finished_event:
             user_id = finished_event.usuario_creador
-            BLC_JSON = blc_sv.collect_event_json(event_id, user_id, db)
+            background_tasks.add_task(blc_sv.send_blc_data, event_id, user_id, db)
             return finished_event
         else:
             raise _fastapi.HTTPException(
                 status_code=404, detail=f"Event with id {event_id} not found"
             )
+
     except Exception as e:
         raise _fastapi.HTTPException(
             status_code=500, detail=f"Failed to end event: {str(e)}"

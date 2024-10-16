@@ -1,51 +1,38 @@
 import React, { useState } from "react";
-import jsQR from "jsqr";
+import { Scanner } from "@yudiel/react-qr-scanner";
+import axios from "axios";
+import { Button } from "flowbite-react";
+import { IoIosQrScanner } from "react-icons/io";
 
 function QrReaderButton() {
   const [qrData, setQrData] = useState("");
+  const [isScanning, setIsScanning] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Función para manejar la carga del archivo PNG
-  const loadQRCode = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  const handleScan = (detectedCodes) => {
+    if (detectedCodes && detectedCodes.length > 0) {
+      const data = detectedCodes[0].rawValue;
+      setQrData(data);
+      try {
+        const userData = JSON.parse(data.replace(/'/g, '"'));
+        validateUser(userData);
+        alert("Data del código QR leído:\n" + data);
+        setIsScanning(false);
+      } catch (error) {
+        console.error("Error al parsear JSON:", error, data);
+        alert("Error al parsear JSON. Verifica que el código QR sea válido.");
+      }
+    }
+  };
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const image = new Image();
-      image.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = image.width;
-        canvas.height = image.height;
-        ctx.drawImage(image, 0, 0, image.width, image.height);
-
-        // Obtener los datos de píxeles de la imagen
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-        if (code) {
-          setQrData(code.data);
-          try {
-            const userData = JSON.parse(code.data.replace(/'/g, '"'));
-            validateUser(userData);
-            alert("Data del código QR leído:\n" + code.data);
-          } catch (error) {
-            console.error("Error al parsear JSON:", error + code.data);
-            alert(
-              "Error al parsear JSON. Verifica que el código QR sea válido."
-            );
-          }
-        } else {
-          alert("No se encontró un código QR válido en la imagen.");
-        }
-      };
-      image.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+  const handleError = (error) => {
+    console.error("Error al escanear código QR:", error);
+    setError(
+      "No se pudo acceder a la cámara. Asegúrate de que los permisos estén habilitados."
+    );
   };
 
   const validateUser = async ({ event_id, email, token }) => {
-    console.log(event_id, email, token);
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/user/validate_by_qr`,
@@ -58,17 +45,67 @@ function QrReaderButton() {
           },
         }
       );
-      if (response.status == 200) {
+      if (response.status === 200) {
         console.log("response", response);
       }
     } catch (error) {
-      console.error("Error starting event:", error);
+      console.error("Error validating user:", error);
+    }
+  };
+
+  const handleStartScan = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+      setError("El navegador no soporta acceso a dispositivos de medios.");
+      return;
+    }
+
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const hasVideoInput = devices.some(
+        (device) => device.kind === "videoinput"
+      );
+
+      if (!hasVideoInput) {
+        throw new Error("No se encontró ningún dispositivo de cámara.");
+      }
+
+      setIsScanning(true);
+    } catch (error) {
+      console.error("Error al iniciar el escaneo:", error);
+      setError(
+        error.message || "Error al iniciar el escaneo. Inténtalo de nuevo."
+      );
     }
   };
 
   return (
     <div>
-      <input type="file" accept="image/png" onChange={loadQRCode} />
+      {isScanning ? (
+        <Scanner
+          onScan={handleScan}
+          onError={handleError}
+          scanDelay={300}
+          constraints={{
+            video: {
+              facingMode: "environment",
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+          }}
+          style={{ width: "100%" }}
+        />
+      ) : (
+        <Button
+          onClick={handleStartScan}
+          className=" mt-6 ring-cyan-700 border border-gray-200 bg-white text-gray-900 focus:text-cyan-700 focus:ring-4 enabled:hover:bg-gray-100 enabled:hover:text-violet-700 dark:border-gray-600 dark:bg-transparent dark:text-gray-400 dark:enabled:hover:bg-gray-700 dark:enabled:hover:text-white"
+        >
+          <div className="flex items-center">
+            <div className="hidden sm:block mr-1">Escanear QR</div>
+            <IoIosQrScanner size={32} />
+          </div>
+        </Button>
+      )}
+      {error && <p style={{ color: "red" }}>{error}</p>}
       <br />
       <p>{qrData}</p>
     </div>
