@@ -28,10 +28,8 @@ async def user_inscription(event_id: int, user_id: int, db: _orm.Session):
         )
         db.add(user_inscription_obj)
 
-    # Confirmar los cambios en la base de datos
     db.commit()
 
-    # Refrescar el objeto de inscripción
     if existing_inscription:
         db.refresh(existing_inscription)
         return existing_inscription

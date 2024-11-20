@@ -75,9 +75,9 @@ async def start_event(event_id: int, db: _orm.Session):
             db.refresh(event_obj)
             return event_obj.fecha_ejecucion
         else:
-            return None  # Evento no encontrado, manejar esto en el endpoint
+            return None
     except Exception as e:
-        raise e  # Propaga la excepción
+        raise e
 
 
 async def end_event(event_id: int, db: _orm.Session):
@@ -91,7 +91,7 @@ async def end_event(event_id: int, db: _orm.Session):
         else:
             return None
     except Exception as e:
-        raise e  # Propaga la excepción
+        raise e
 
 
 async def save_event_image(id, name, path, db: _orm.Session):

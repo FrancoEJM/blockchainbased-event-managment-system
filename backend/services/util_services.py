@@ -56,9 +56,9 @@ def calculate_age(birthdate):
                     birthdate.date()
                 )  # Convertir a datetime.date si es datetime.datetime
             elif isinstance(birthdate, _dt.date):
-                pass  # Si ya es datetime.date, no hacer nada
+                pass
             else:
-                return None  # Formato inválido
+                return None
 
             today = _dt.date.today()
             age = (

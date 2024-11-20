@@ -33,10 +33,7 @@ async def create_cryptographic_credentials(user_id: int, db: _orm.Session):
 
 async def create_key_pair():
     # Generar la clave privada
-    private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048,
-    )
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
     # Obtener la clave pública correspondiente
     public_key = private_key.public_key()

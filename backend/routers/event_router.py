@@ -66,26 +66,6 @@ async def create_new_event(
     return create_event
 
 
-# @router.post("/api/event/upload")
-# async def upload_event_image(
-#     id: int,
-#     file: _fastapi.UploadFile = _fastapi.File(...),
-#     db: _orm.Session = _fastapi.Depends(db_sv.get_db),
-# ):
-#     try:
-#         new_filename = f"{id}_{file.filename}"
-#         with open(os.path.join(UPLOAD_DIRECTORY, new_filename), "wb") as buffer:
-#             buffer.write(await file.read())
-
-#         new_image = await event_sv.save_event_image(
-#             id, file.filename, f"{UPLOAD_DIRECTORY}{new_filename}", db
-#         )
-
-#         return {"new_image": new_image}
-#     except Exception as e:
-#         raise _fastapi.HTTPException(status_code=500, detail=str(e))
-
-
 @router.post("/api/event/upload")
 async def upload_event_image(
     id: int,
@@ -198,15 +178,10 @@ async def delete_event(
 ):
     try:
         with db.begin():
-            # Delete from BLC_EVENTOS_INVITADOS (multiple records)
             await event_sv.delete_event_invitados(event_id, db)
-            # Delete from BLC_IMAGENES (single record)
             await event_sv.delete_event_imagen(event_id, db)
-            # Delete from BLC_EVENTO_USUARIO (single record)
             await event_sv.delete_event_usuario(event_id, db)
-            # Delete from BLC_EVENTOS (single record)
             await event_sv.delete_event(event_id, db)
-            # Delete from BLC_EVENTOS_CREACION (single record)
             await event_sv.delete_event_creacion(event_id, db)
         return {"message": f"El evento {event_id} ha sido eliminado."}
     except Exception as e:

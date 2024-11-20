@@ -4,11 +4,6 @@ from models import event_models as event_md
 
 
 async def generate_user_qr(event_id: int, email: str, token: str, db: _orm.Session):
-    print("INICIOOOOOOOOOOOOOOO")
-    print("INICIOOOOOOOOOOOOOOO")
-    print("INICIOOOOOOOOOOOOOOO")
-    print("INICIOOOOOOOOOOOOOOO")
-    print("INICIOOOOOOOOOOOOOOO")
     qr_data = {"event_id": event_id, "email": email, "token": token}
     qr = qrcode.QRCode(
         version=1,
@@ -37,7 +32,3 @@ async def generate_user_qr(event_id: int, email: str, token: str, db: _orm.Sessi
         db.add(new_qr)
 
     db.commit()
-    print("TERMINOOOOO")
-    print("TERMINOOOOO")
-    print("TERMINOOOOO")
-    print("TERMINOOOOO")
